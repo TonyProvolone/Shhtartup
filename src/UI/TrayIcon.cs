@@ -16,14 +16,21 @@ internal static class TrayIcon
 
     public static nint Hwnd { get; private set; }
 
+    // Hwnd is message-only (SingleInstance finds running copies that way), and message-only windows
+    // never receive broadcasts. This hidden top-level window hears them instead: Explorer restarting
+    // (TaskbarCreated) and theme changes (WM_SETTINGCHANGE).
+    private const string BroadcastClassName = "ShhtartupTrayBroadcastClass";
+
     private static uint _taskbarCreatedMessage;
     private static nint _hInstance;
     private static nint _hIcon;
+    private static (bool LightTaskbar, int Size) _iconStyle;
 
     public static void Initialize()
     {
         _hInstance = User32.GetModuleHandleW(null);
-        _hIcon = User32.LoadIconW(0, (nint)User32.IDI_APPLICATION);
+        _iconStyle = (Theme.TaskbarIsLight(), AppIcons.TraySize);
+        _hIcon = AppIcons.CreateTrayIcon(_iconStyle.LightTaskbar, _iconStyle.Size);
 
         unsafe
         {
@@ -37,6 +44,15 @@ internal static class TrayIcon
                 lpszClassName = ClassName,
             };
             User32.RegisterClassExW(in wndClass);
+
+            var broadcastClass = new WNDCLASSEXW
+            {
+                cbSize = (uint)Marshal.SizeOf<WNDCLASSEXW>(),
+                lpfnWndProc = (nint)(delegate* unmanaged<nint, uint, nuint, nint, nint>)&BroadcastWndProc,
+                hInstance = _hInstance,
+                lpszClassName = BroadcastClassName,
+            };
+            User32.RegisterClassExW(in broadcastClass);
         }
 
         Hwnd = User32.CreateWindowExW(
@@ -46,7 +62,43 @@ internal static class TrayIcon
 
         _taskbarCreatedMessage = User32.RegisterWindowMessageW("TaskbarCreated");
 
+        // Never shown.
+        User32.CreateWindowExW(
+            User32.WS_EX_TOOLWINDOW, BroadcastClassName, "Shhtartup", User32.WS_POPUP,
+            0, 0, 0, 0,
+            0, 0, _hInstance, 0);
+
         AddTrayIcon();
+    }
+
+    // Swaps the tray icon when the taskbar switches between light and dark (or the scaling changes).
+    private static void RefreshIcon()
+    {
+        var style = (LightTaskbar: Theme.TaskbarIsLight(), Size: AppIcons.TraySize);
+        if (style == _iconStyle)
+        {
+            return;
+        }
+
+        _iconStyle = style;
+        var oldIcon = _hIcon;
+        _hIcon = AppIcons.CreateTrayIcon(style.LightTaskbar, style.Size);
+
+        var data = new NOTIFYICONDATAW
+        {
+            cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
+            hWnd = Hwnd,
+            uID = TrayIconId,
+            uFlags = Shell32.NIF_ICON,
+            hIcon = _hIcon,
+            szTip = string.Empty,
+            szInfo = string.Empty,
+            szInfoTitle = string.Empty,
+        };
+        Shell32.Shell_NotifyIconW(Shell32.NIM_MODIFY, ref data);
+
+        // The tray keeps its own copy, so the old handle can go.
+        User32.DestroyIcon(oldIcon);
     }
 
     private static void AddTrayIcon()
@@ -142,12 +194,6 @@ internal static class TrayIcon
             return 0;
         }
 
-        if (_taskbarCreatedMessage != 0 && msg == _taskbarCreatedMessage)
-        {
-            AddTrayIcon();
-            return 0;
-        }
-
         switch (msg)
         {
             case User32.WM_TIMER:
@@ -189,6 +235,23 @@ internal static class TrayIcon
             case User32.WM_DESTROY:
                 User32.PostQuitMessage(0);
                 return 0;
+        }
+
+        return User32.DefWindowProcW(hWnd, msg, wParam, lParam);
+    }
+
+    [UnmanagedCallersOnly]
+    private static nint BroadcastWndProc(nint hWnd, uint msg, nuint wParam, nint lParam)
+    {
+        if (_taskbarCreatedMessage != 0 && msg == _taskbarCreatedMessage)
+        {
+            AddTrayIcon();
+            return 0;
+        }
+
+        if (msg == User32.WM_SETTINGCHANGE)
+        {
+            RefreshIcon();
         }
 
         return User32.DefWindowProcW(hWnd, msg, wParam, lParam);

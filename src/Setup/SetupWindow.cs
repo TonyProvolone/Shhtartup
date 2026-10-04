@@ -127,7 +127,7 @@ internal static class SetupWindow
                     cbSize = (uint)Marshal.SizeOf<WNDCLASSEXW>(),
                     lpfnWndProc = (nint)(delegate* unmanaged<nint, uint, nuint, nint, nint>)&WndProc,
                     hInstance = hInstance,
-                    hIcon = User32.LoadIconW(0, User32.IDI_APPLICATION),
+                    hIcon = AppIcons.App,
                     hCursor = User32.LoadCursorW(0, User32.IDC_ARROW),
                     lpszClassName = ClassName,
                 };

@@ -1,0 +1,12 @@
+<!-- Ear Guard glyph on a 64x64 grid. Single colour (currentColor); the ear is cut out of the shield.
+     The "detail" path is left out at 20px and below.
+-->
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <mask id="ear-guard">
+    <rect width="64" height="64" fill="#000"/>
+    <path d="M32 5 L55 13 V30 C55 45 45 55 32 60 C19 55 9 45 9 30 V13 Z" fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M23 28 C23 21 27 17 32.5 17 C38.5 17 42.5 21.5 42.5 28 C42.5 35 38 37 36.5 41 C35.5 44 34 47 30.5 47 C27.5 47 26 45 26 42.5" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+    <path class="detail" d="M28.5 28.5 C28.5 25.5 30.5 23.5 33 23.5 C35.5 23.5 37 25.5 37 28 C37 30.5 35 31.5 33.5 33" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>
+  </mask>
+  <rect width="64" height="64" fill="currentColor" mask="url(#ear-guard)"/>
+</svg>

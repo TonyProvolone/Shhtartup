@@ -32,10 +32,17 @@
     <ThreadPoolMaxThreads>4</ThreadPoolMaxThreads>
 
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Icons are built from the SVGs in Assets by scripts\build-icons.ps1. -->
+    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
 
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <EnableAotAnalyzer>true</EnableAotAnalyzer>
     <WarningsAsErrors>IL3050;IL2026;IL3052</WarningsAsErrors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\TrayDark.ico" LogicalName="TrayDark.ico" />
+    <EmbeddedResource Include="Assets\TrayLight.ico" LogicalName="TrayLight.ico" />
+  </ItemGroup>
 
 </Project>

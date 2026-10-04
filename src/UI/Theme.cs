@@ -80,6 +80,20 @@ internal static class Theme
         P = Build(IsDark, ReadAccent(IsDark));
     }
 
+    // The taskbar has its own light/dark setting ("Windows mode"), separate from the apps one above.
+    // Missing on older Windows 10, whose taskbar is always dark.
+    public static bool TaskbarIsLight()
+    {
+        try
+        {
+            return Registry.GetValue(PersonalizeKey, "SystemUsesLightTheme", 0) is int light && light == 1;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     // Dark title bar to match the theme; on Windows 11 also rounded corners and a theme-coloured border
     // for popups (normal windows are rounded by Windows automatically).
     public static void ApplyFrame(nint hwnd, bool isPopup)

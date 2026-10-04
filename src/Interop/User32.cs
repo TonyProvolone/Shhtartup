@@ -228,6 +228,23 @@ internal static partial class User32
     [LibraryImport("user32.dll", EntryPoint = "LoadIconW")]
     public static partial nint LoadIconW(nint hInstance, nint lpIconName);
 
+    public const int SM_CXSMICON = 49;
+    public const uint LR_DEFAULTCOLOR = 0x00000000;
+
+    // One image from an .ico file (PNG or DIB data) as an icon handle. dwVer must be 0x00030000.
+    [LibraryImport("user32.dll")]
+    public static unsafe partial nint CreateIconFromResourceEx(byte* presbits, uint dwResSize, [MarshalAs(UnmanagedType.Bool)] bool fIcon, uint dwVer, int cxDesired, int cyDesired, uint flags);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool DestroyIcon(nint hIcon);
+
+    [LibraryImport("user32.dll")]
+    public static partial uint GetDpiForSystem();
+
+    [LibraryImport("user32.dll")]
+    public static partial int GetSystemMetricsForDpi(int nIndex, uint dpi);
+
     [LibraryImport("kernel32.dll", EntryPoint = "GetModuleHandleW", StringMarshalling = StringMarshalling.Utf16)]
     public static partial nint GetModuleHandleW(string? lpModuleName);
 
