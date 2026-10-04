@@ -105,6 +105,12 @@ internal static class ProcessWatcher
         string? source = null;
         if (path is not null && KnownGames.Contains(path))
         {
+            // Already turned down on an earlier launch. Unless the user wants it every time, leave it
+            // at whatever they've set since (Windows keeps each app's volume between launches).
+            if (!Settings.Current.AdjustEveryLaunch)
+            {
+                return;
+            }
             source = "remembered";
         }
         else if (fromLauncher)

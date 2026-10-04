@@ -15,7 +15,7 @@ internal static class SettingsWindow
 
     // Layout in device-independent pixels.
     private const int ClientWDip = 460;
-    private const int ClientHDip = 298;
+    private const int ClientHDip = 374;
     private const int CardXDip = 16;
     private const int CardWDip = 428;
     private const int ContentXDip = 32;
@@ -23,8 +23,9 @@ internal static class SettingsWindow
 
     private const int VolumeCardYDip = 16;
     private const int VolumeCardHDip = 114;
-    private const int StartupCardYDip = 138;
-    private const int MemoryCardYDip = 214;
+    private const int EveryLaunchCardYDip = 138;
+    private const int StartupCardYDip = 214;
+    private const int MemoryCardYDip = 290;
     private const int SmallCardHDip = 68;
 
     private const int SliderXDip = 32;
@@ -50,7 +51,7 @@ internal static class SettingsWindow
     private const int ButtonXDip = 332;
     private const int ButtonWDip = 96;
 
-    private enum Part { None, Slider, Box, SpinUp, SpinDown, Toggle, Forget }
+    private enum Part { None, Slider, Box, SpinUp, SpinDown, EveryLaunchToggle, Toggle, Forget }
 
     public static nint Hwnd { get; private set; }
 
@@ -268,17 +269,17 @@ internal static class SettingsWindow
         return new UiRect(box.X + f.Px(offsetDip), box.Y + (box.H - h) / 2, f.Px(SpinWDip), h);
     }
 
-    private static UiRect ToggleRect(UiFonts f)
+    private static UiRect ToggleRect(UiFonts f, int cardYDip)
     {
-        var card = CardRect(f, StartupCardYDip, SmallCardHDip);
+        var card = CardRect(f, cardYDip, SmallCardHDip);
         var toggle = Fluent.ToggleRect(f, f.Px(ToggleXDip), 0);
         return toggle with { Y = card.Y + (card.H - toggle.H) / 2 };
     }
 
     // The toggle plus its "On"/"Off" label are clickable, like in Windows Settings.
-    private static UiRect ToggleHitRect(UiFonts f)
+    private static UiRect ToggleHitRect(UiFonts f, int cardYDip)
     {
-        var toggle = ToggleRect(f);
+        var toggle = ToggleRect(f, cardYDip);
         var labelW = f.Px(ToggleLabelWDip);
         return new UiRect(toggle.X - labelW, toggle.Y - f.Px(6), labelW + toggle.W, toggle.H + f.Px(12));
     }
@@ -297,7 +298,8 @@ internal static class SettingsWindow
         if (SpinRect(f, SpinUpXDip).Contains(x, y)) return Part.SpinUp;
         if (SpinRect(f, SpinDownXDip).Contains(x, y)) return Part.SpinDown;
         if (BoxRect(f).Contains(x, y)) return Part.Box;
-        if (ToggleHitRect(f).Contains(x, y)) return Part.Toggle;
+        if (ToggleHitRect(f, EveryLaunchCardYDip).Contains(x, y)) return Part.EveryLaunchToggle;
+        if (ToggleHitRect(f, StartupCardYDip).Contains(x, y)) return Part.Toggle;
         if (ButtonRect(f).Contains(x, y) && KnownGames.Count > 0) return Part.Forget;
         return Part.None;
     }
@@ -393,6 +395,11 @@ internal static class SettingsWindow
 
             case Part.SpinDown:
                 SetVolume(Settings.Current.DefaultVolumePercent - 1, fromEdit: false, save: true);
+                break;
+
+            case Part.EveryLaunchToggle:
+                Settings.Current.AdjustEveryLaunch = !Settings.Current.AdjustEveryLaunch;
+                Settings.Save();
                 break;
 
             case Part.Toggle:
@@ -574,14 +581,11 @@ internal static class SettingsWindow
             DrawSpin(p, f, SpinUpXDip, Fluent.GlyphChevronUp, Part.SpinUp);
             DrawSpin(p, f, SpinDownXDip, Fluent.GlyphChevronDown, Part.SpinDown);
 
-            // Run on startup.
-            Fluent.Card(p, f, CardRect(f, StartupCardYDip, SmallCardHDip));
-            CardText(p, f, StartupCardYDip + 15, ToggleXDip - ToggleLabelWDip,
-                "Run on startup", "Start Shhtartup automatically on startup");
-            var toggle = ToggleRect(f);
-            p.Text(_autoStart ? "On" : "Off", f.Body, t.TextPrimary,
-                new UiRect(toggle.X - f.Px(ToggleLabelWDip), toggle.Y, f.Px(ToggleLabelWDip - 12), toggle.H), Fluent.TextRight);
-            Fluent.Toggle(p, f, toggle, _autoStart, hover: _hover == Part.Toggle, surface: t.CardBg);
+            ToggleCard(p, f, EveryLaunchCardYDip, "Adjust on every launch",
+                "When off, only a game's first launch is adjusted",
+                Settings.Current.AdjustEveryLaunch, Part.EveryLaunchToggle);
+            ToggleCard(p, f, StartupCardYDip, "Run on startup",
+                "Start Shhtartup automatically on startup", _autoStart, Part.Toggle);
 
             // Remembered games & apps.
             var count = KnownGames.Count;
@@ -592,6 +596,17 @@ internal static class SettingsWindow
             Fluent.Button(p, f, ButtonRect(f), "Forget all",
                 hover: _hover == Part.Forget, pressed: _pressed == Part.Forget, enabled: count > 0);
         }
+    }
+
+    private static void ToggleCard(Painter p, UiFonts f, int cardYDip, string title, string description, bool on, Part part)
+    {
+        var t = Theme.P;
+        Fluent.Card(p, f, CardRect(f, cardYDip, SmallCardHDip));
+        CardText(p, f, cardYDip + 15, ToggleXDip - ToggleLabelWDip, title, description);
+        var toggle = ToggleRect(f, cardYDip);
+        p.Text(on ? "On" : "Off", f.Body, t.TextPrimary,
+            new UiRect(toggle.X - f.Px(ToggleLabelWDip), toggle.Y, f.Px(ToggleLabelWDip - 12), toggle.H), Fluent.TextRight);
+        Fluent.Toggle(p, f, toggle, on, hover: _hover == part, surface: t.CardBg);
     }
 
     private static void CardText(Painter p, UiFonts f, int topDip, int rightDip, string title, string description)

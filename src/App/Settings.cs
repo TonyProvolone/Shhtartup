@@ -7,6 +7,9 @@ internal sealed class AppSettings
 {
     public int DefaultVolumePercent { get; set; } = 25;
     public bool StartWithWindows { get; set; } = true;
+    // Off: a game/app is only turned down the first time it's seen (until "Forget all"), so any
+    // level the user sets afterwards is left alone.
+    public bool AdjustEveryLaunch { get; set; } = true;
 }
 
 [JsonSerializable(typeof(AppSettings))]
