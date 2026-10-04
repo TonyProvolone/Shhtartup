@@ -42,5 +42,4 @@ Rick-click the tray icon and click  **Check for updates**
 
 ## How to uninstall
 
-Open **Settings** → **Apps** → **Installed apps**, find Tinnitdown and choose **Uninstall**. This
-removes the app along with all of its settings and remembered games/apps.
+Open **Settings** → **Apps** → **Installed apps**, find Tinnitdown and choose **Uninstall**
