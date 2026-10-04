@@ -4,7 +4,8 @@
 #   3. builds the Native AOT exe
 #   4. opens RELEASE_NOTES.md in VS Code and waits for you to save and close it
 #   5. commits everything, tags the version, pushes, and creates the GitHub release with the exe
-#   6. opens the release in your browser
+#   6. checks the README's "Download Latest Version" link now serves the new exe
+#   7. opens the release in your browser
 #
 # Run it with release.cmd (or: powershell -ExecutionPolicy Bypass -File release.ps1).
 # Needs git, the .NET SDK, VS Code's "code" command and the GitHub CLI ("gh", signed in).
@@ -20,6 +21,10 @@ $Manifest = 'app.manifest'
 $NotesFile = 'RELEASE_NOTES.md'
 $ExeName = 'Tinnitdown.exe'
 $FirstVersion = '0.1.0'
+
+# The README's "Download Latest Version" button. GitHub redirects this to the newest release's asset
+# of the same name, so the README never needs editing -- every release just has to upload $ExeName.
+$LatestDownloadUrl = "https://github.com/$Repo/releases/latest/download/$ExeName"
 
 $NotesTemplate = @'
 <!--
@@ -106,6 +111,30 @@ function Get-CleanNotes([string]$text) {
     return (@($kept) -join "`n`n").Trim()
 }
 
+# Where GitHub sends a request for $url (its Location header), without following it.
+function Get-RedirectTarget([string]$url) {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+    $request = [Net.HttpWebRequest]::Create($url)
+    $request.Method = 'HEAD'
+    $request.AllowAutoRedirect = $false
+    $request.UserAgent = 'Tinnitdown-release-script'
+    try { $response = $request.GetResponse() }
+    catch [Net.WebException] { $response = $_.Exception.Response }
+    if (-not $response) { return $null }
+    try { return $response.Headers['Location'] }
+    finally { $response.Close() }
+}
+
+# Confirms the README button now serves this release's exe (GitHub can take a few seconds to switch).
+function Test-LatestDownload([string]$version) {
+    for ($attempt = 1; $attempt -le 5; $attempt++) {
+        try { $target = Get-RedirectTarget $LatestDownloadUrl } catch { $target = $null }
+        if ($target -like "*/releases/download/$version/$ExeName") { return $true }
+        Start-Sleep -Seconds 3
+    }
+    return $false
+}
+
 function Get-ReleaseVersions {
     $tags = @(git tag --list)
     if ($LASTEXITCODE -ne 0) { Fail 'Reading git tags failed.' }
@@ -141,7 +170,7 @@ function Edit-ReleaseNotes([string]$version) {
     $path = Join-Path $PSScriptRoot $NotesFile
 
     # Notes left over from a cancelled run (changed since the last commit) are reused, not overwritten.
-    $isDraft = (Test-Path $path) -and ((git status --porcelain -- $NotesFile) -ne $null)
+    $isDraft = (Test-Path $path) -and ($null -ne (git status --porcelain -- $NotesFile))
     if ($isDraft) {
         Write-Host "    Reusing the unfinished $NotesFile from last time."
     }
@@ -183,6 +212,11 @@ function Invoke-Release {
         if ($behind -gt 0) { Fail "Your $branch branch is $behind commit(s) behind GitHub. Pull first." }
     }
     Write-Host "    Releasing from branch '$branch'."
+
+    $readme = Join-Path $PSScriptRoot 'README.md'
+    if ((Test-Path $readme) -and -not (Select-String -Path $readme -SimpleMatch $LatestDownloadUrl -Quiet)) {
+        Warn "README.md's download button doesn't link to $LatestDownloadUrl."
+    }
 
     Step 'Version'
     $version = Read-ReleaseVersion
@@ -239,10 +273,19 @@ function Invoke-Release {
             "      gh release create $version `"$exe`" --repo $Repo --title `"Tinnitdown $version`" --notes-file $NotesFile --verify-tag")
     }
 
+    Step 'Checking the README download button'
+    if (Test-LatestDownload $version) {
+        Write-Host "    $LatestDownloadUrl now serves $version."
+    }
+    else {
+        Warn "The download button doesn't point at $version yet. Check that the release is marked Latest on GitHub."
+    }
+
     $url = "https://github.com/$Repo/releases/tag/$version"
     Write-Host ''
     Write-Host "Released Tinnitdown $version" -ForegroundColor Green
-    Write-Host "    $url"
+    Write-Host "    Release:  $url"
+    Write-Host "    Download: $LatestDownloadUrl"
     Start-Process $url
 }
 
