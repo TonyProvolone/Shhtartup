@@ -14,10 +14,10 @@ DISCLAIMER: This was totally written using AI because I'm a lowly front end web 
 
 [![Download Latest Version](https://img.shields.io/badge/Download-Latest%20Version-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/TonyProvolone/Tinnitdown/releases/latest/download/Tinnitdown.exe)
 
-1. Download the latest version above.
-2. Move it to a folder you keep apps in, such as `%LOCALAPPDATA%\Programs\Tinnitdown`. Avoid
-   `Program Files`: Tinnitdown can't update itself there.
-3. Double-click it. Its icon appears in the system tray (click `^` on the taskbar if it's hidden).
+1. Download the latest version above and run it.
+2. Choose where to install Tinnitdown (the default is fine), whether you want a desktop shortcut and
+   to start it with Windows, then click **Install**.
+3. Its icon appears in the system tray (click `^` on the taskbar if it's hidden).
 
 The app isn't code-signed, so Windows SmartScreen may warn you the first time you run the installer. If so, click **More info** → **Run anyway**.
 
@@ -36,4 +36,9 @@ Tinnitdown checks for a new version every time it starts.
 - **Remind me later**: asks again the next time Tinnitdown starts.
 
 You can also right-click the tray icon and choose **Check for updates**, or download the latest
-version manually and replace your copy.
+version above and run it. It installs over your existing copy, in the same folder.
+
+## How to uninstall
+
+Open **Settings** → **Apps** → **Installed apps**, find Tinnitdown and choose **Uninstall**. This
+removes the app along with all of its settings and remembered games/apps.

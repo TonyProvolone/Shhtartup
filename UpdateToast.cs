@@ -324,8 +324,8 @@ internal static class UpdateToast
 
         if (_mode == Mode.Offer)
         {
-            p.Text($"Tinnitdown {_release?.Version} is available", f.BodyStrong, t.TextPrimary, title, Fluent.TextLeft);
-            p.Text($"You have version {UpdateChecker.CurrentVersion}.", f.Caption, t.TextSecondary, subtitle, Fluent.TextLeft);
+            p.Text($"New version available: {_release?.Version}", f.BodyStrong, t.TextPrimary, title, Fluent.TextLeft);
+            p.Text($"Current version: {UpdateChecker.CurrentVersion}", f.Caption, t.TextSecondary, subtitle, Fluent.TextLeft);
 
             Fluent.AccentButton(p, f, ButtonRect(f, w, 0), "Install and restart",
                 hover: _hover == Part.InstallNow, pressed: _pressed == Part.InstallNow);
@@ -338,10 +338,10 @@ internal static class UpdateToast
         {
             var (heading, detail) = _stage switch
             {
-                UpdateInstaller.Stage.Downloading => ($"Downloading Tinnitdown {_installingVersion}…", $"{_percent}%"),
-                UpdateInstaller.Stage.Verifying => ("Verifying the download…", "Checking it matches the release"),
-                UpdateInstaller.Stage.Installing => ($"Installing Tinnitdown {_installingVersion}…", "Replacing the app file"),
-                _ => ("Restarting Tinnitdown…", "Opening the new version"),
+                UpdateInstaller.Stage.Downloading => ($"Downloading {_installingVersion}…", $"{_percent}%"),
+                UpdateInstaller.Stage.Verifying => ("Verifying download…", "Checking it matches the release"),
+                UpdateInstaller.Stage.Installing => ($"Installing {_installingVersion}…", "Replacing files"),
+                _ => ("Restarting…", "Opening"),
             };
             var steps = _willRestart ? 4 : 3;
             var step = (int)_stage;

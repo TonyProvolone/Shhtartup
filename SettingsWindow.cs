@@ -152,7 +152,7 @@ internal static class SettingsWindow
         var x = work.Left + (work.Right - work.Left - w) / 2;
         var y = work.Top + (work.Bottom - work.Top - h) / 2;
 
-        Hwnd = User32.CreateWindowExW(0, ClassName, "Tinnitdown Settings", style, x, y, w, h, 0, 0, hInstance, 0);
+        Hwnd = User32.CreateWindowExW(0, ClassName, "Settings", style, x, y, w, h, 0, 0, hInstance, 0);
 
         _editHwnd = User32.CreateWindowExW(0, "Edit", "",
             User32.WS_CHILD | User32.WS_VISIBLE | User32.WS_TABSTOP | User32.ES_NUMBER | User32.ES_RIGHT,
@@ -577,7 +577,7 @@ internal static class SettingsWindow
             // Run on startup.
             Fluent.Card(p, f, CardRect(f, StartupCardYDip, SmallCardHDip));
             CardText(p, f, StartupCardYDip + 15, ToggleXDip - ToggleLabelWDip,
-                "Run on startup", "Start Tinnitdown when you sign in to Windows");
+                "Run on startup", "Start Tinnitdown automatically on startup");
             var toggle = ToggleRect(f);
             p.Text(_autoStart ? "On" : "Off", f.Body, t.TextPrimary,
                 new UiRect(toggle.X - f.Px(ToggleLabelWDip), toggle.Y, f.Px(ToggleLabelWDip - 12), toggle.H), Fluent.TextRight);
@@ -587,8 +587,8 @@ internal static class SettingsWindow
             var count = KnownGames.Count;
             Fluent.Card(p, f, CardRect(f, MemoryCardYDip, SmallCardHDip));
             CardText(p, f, MemoryCardYDip + 15, ButtonXDip - 12, "Remembered games & apps",
-                count == 0 ? "None yet. Added automatically when first caught"
-                : $"{count} remembered, caught on every future launch");
+                count == 0 ? "None yet."
+                : $"{count} logged and adjusted");
             Fluent.Button(p, f, ButtonRect(f), "Forget all",
                 hover: _hover == Part.Forget, pressed: _pressed == Part.Forget, enabled: count > 0);
         }

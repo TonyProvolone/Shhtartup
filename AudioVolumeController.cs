@@ -210,7 +210,7 @@ internal static class AudioVolumeController
         {
             var hr = Ole32.CoCreateInstance(
                 AudioGuids.CLSID_MMDeviceEnumerator, 0, Ole32.CLSCTX_INPROC_SERVER,
-                AudioGuids.IID_IMMDeviceEnumerator, out var enumerator);
+                AudioGuids.IID_IMMDeviceEnumerator, out IMMDeviceEnumerator enumerator);
             _enumerator = hr >= 0 ? enumerator : null;
         }
         return _enumerator;

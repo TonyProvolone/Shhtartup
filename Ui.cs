@@ -133,6 +133,15 @@ internal sealed class Painter : IDisposable
         Gdi32.SelectObject(_dc, oldFont);
     }
 
+    public int MeasureText(string text, nint font)
+    {
+        var oldFont = Gdi32.SelectObject(_dc, font);
+        var r = new RECT();
+        User32.DrawTextW(_dc, text, text.Length, ref r, User32.DT_CALCRECT | User32.DT_SINGLELINE | User32.DT_NOPREFIX);
+        Gdi32.SelectObject(_dc, oldFont);
+        return r.Right - r.Left;
+    }
+
     public void Dispose()
     {
         Gdiplus.GdipDeleteGraphics(_graphics);
@@ -251,6 +260,27 @@ internal static class Fluent
 
         var color = !enabled ? t.TextDisabled : pressed ? t.TextSecondary : t.TextPrimary;
         p.Text(text, f.Body, color, r, TextCenter);
+    }
+
+    // --- Check box (20x20): outlined when off, accent-filled with a check mark when on.
+
+    public const char GlyphCheckMark = '';
+
+    public static void CheckBox(Painter p, UiFonts f, UiRect r, bool isChecked, bool hover, Rgb surface)
+    {
+        var t = Theme.P;
+        var radius = f.Px(4);
+        if (isChecked)
+        {
+            p.FillRoundRect(r.X, r.Y, r.W, r.H, radius, hover ? t.AccentHover : t.Accent);
+            Glyph(p, f.IconSmall, GlyphCheckMark, t.TextOnAccent, r);
+        }
+        else
+        {
+            var b = f.Hairline;
+            p.FillRoundRect(r.X, r.Y, r.W, r.H, radius, t.ToggleOffBorder);
+            p.FillRoundRect(r.X + b, r.Y + b, r.W - 2 * b, r.H - 2 * b, radius - b, hover ? t.SubtleHover : surface);
+        }
     }
 
     // --- Accent (primary) button: filled with the accent colour.

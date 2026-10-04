@@ -56,6 +56,9 @@ internal static partial class Shell32
     [LibraryImport("shell32.dll")]
     public static partial int SHQueryUserNotificationState(out int pquns);
 
+    [LibraryImport("shell32.dll", StringMarshalling = StringMarshalling.Utf16)]
+    public static partial int SHCreateItemFromParsingName(string pszPath, nint pbc, in Guid riid, out IShellItem ppv);
+
     // NOTIFYICONDATAW contains fixed-size marshalled string fields, which source-generated
     // LibraryImport cannot marshal when nested in a struct (SYSLIB1051) -- classic DllImport
     // marshalling (ILC-generated, not reflection-based) still works under Native AOT.

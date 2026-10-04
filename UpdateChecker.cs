@@ -85,16 +85,16 @@ internal static class UpdateChecker
                 break;
 
             case Outcome.UpToDate when !silent:
-                Notify("You're up to date", $"Tinnitdown {CurrentVersion} is the latest version.");
+                Notify("You're up to date", $"{CurrentVersion} is the latest version.");
                 break;
 
             case Outcome.NoReleases when !silent:
-                Notify("No releases yet", "There's no published release to update to yet.");
+                Notify("No releases yet", "No new releases published.");
                 break;
 
             case Outcome.BadTag when !silent:
-                Notify("Couldn't read the latest version",
-                    $"The latest release is tagged \"{result.Tag}\". Click to view it.", warning: true, result.PageUrl);
+                Notify("Couldn't read latest version",
+                    $"Latest release is tagged \"{result.Tag}\". Click to view it.", warning: true, result.PageUrl);
                 break;
 
             case Outcome.Failed when silent:
@@ -106,7 +106,7 @@ internal static class UpdateChecker
                 break;
 
             case Outcome.Failed:
-                Notify("Couldn't check for updates",
+                Notify("Unable to check for updates",
                     "GitHub couldn't be reached. Check your connection and try again.", warning: true);
                 break;
         }
@@ -118,7 +118,7 @@ internal static class UpdateChecker
         {
             if (!silent)
             {
-                Notify("Update ready", $"Tinnitdown {installed} is installed and starts the next time you open Tinnitdown.");
+                Notify("Update ready", $"{installed} is installed and and ready the next time you start.");
             }
             return;
         }
@@ -132,7 +132,7 @@ internal static class UpdateChecker
         {
             // The release has no exe attached -- point at the release page instead.
             Notify("Update available",
-                $"Tinnitdown {release.Version} is available (you have {CurrentVersion}). Click to view it.",
+                $"Tinnitdown {release.Version} is available (you have {CurrentVersion}). Click to view.",
                 clickUrl: release.PageUrl);
             return;
         }

@@ -22,4 +22,20 @@ internal static partial class Ole32
         uint dwClsContext,
         in Guid riid,
         out IMMDeviceEnumerator ppv);
+
+    [LibraryImport("ole32.dll")]
+    public static partial int CoCreateInstance(
+        in Guid rclsid,
+        nint pUnkOuter,
+        uint dwClsContext,
+        in Guid riid,
+        out IFileDialog ppv);
+
+    [LibraryImport("ole32.dll")]
+    public static partial int CoCreateInstance(
+        in Guid rclsid,
+        nint pUnkOuter,
+        uint dwClsContext,
+        in Guid riid,
+        out IShellLinkW ppv);
 }

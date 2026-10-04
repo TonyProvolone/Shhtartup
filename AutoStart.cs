@@ -20,14 +20,22 @@ internal static class AutoStart
         return exePath is not null && value.Trim('"').Equals(exePath, StringComparison.OrdinalIgnoreCase);
     }
 
-    public static void SetEnabled(bool enabled)
+    // Whether any startup entry exists, even one pointing at a different copy of the exe.
+    public static bool HasEntry()
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, writable: false);
+        return key?.GetValue(ValueName) is string;
+    }
+
+    // exePath defaults to this process's exe (the installer passes the installed copy instead).
+    public static void SetEnabled(bool enabled, string? exePath = null)
     {
         using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, writable: true)
             ?? Registry.CurrentUser.CreateSubKey(RunKeyPath, writable: true);
 
         if (enabled)
         {
-            var exePath = Environment.ProcessPath;
+            exePath ??= Environment.ProcessPath;
             if (exePath is not null)
             {
                 key.SetValue(ValueName, $"\"{exePath}\"");

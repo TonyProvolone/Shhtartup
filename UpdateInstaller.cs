@@ -15,6 +15,9 @@ internal static class UpdateInstaller
 
     public enum Stage { Downloading, Verifying, Installing, Restarting }
 
+    // Passed to the relaunched copy so it waits for this one to exit (SingleInstance) and says so.
+    public const string AfterUpdateArg = "--after-update";
+
     // Verifying and installing take milliseconds; hold each on screen long enough to read.
     private const int MinStageMs = 600;
 
@@ -66,7 +69,7 @@ internal static class UpdateInstaller
 
         if (_error is { } error)
         {
-            UpdateChecker.Notify("Couldn't install the update", $"{error} Click to download it manually.",
+            UpdateChecker.Notify("Unable to install latest update", $"{error} Click to download manually.",
                 warning: true, clickUrl: release.PageUrl);
             return;
         }
@@ -77,7 +80,7 @@ internal static class UpdateInstaller
         {
             try
             {
-                Process.Start(new ProcessStartInfo(ExePath()!) { UseShellExecute = false });
+                Process.Start(new ProcessStartInfo(ExePath()!, AfterUpdateArg) { UseShellExecute = false });
                 TrayIcon.ExitApp();
                 return;
             }
@@ -87,7 +90,7 @@ internal static class UpdateInstaller
             }
         }
 
-        UpdateChecker.Notify("Update installed", $"Tinnitdown {release.Version} starts the next time you open Tinnitdown.");
+        UpdateChecker.Notify("Update installed", $"{release.Version} starts the next time you open Tinnitdown.");
     }
 
     // Returns null on success, or a sentence describing what went wrong.
@@ -96,7 +99,7 @@ internal static class UpdateInstaller
         var exe = ExePath();
         if (exe is null)
         {
-            return "Tinnitdown couldn't find its own exe to replace.";
+            return "Couldn't find its exe to replace.";
         }
 
         var newPath = exe + NewSuffix;
@@ -138,13 +141,13 @@ internal static class UpdateInstaller
             if (release.Size > 0 && received != release.Size)
             {
                 TryDelete(newPath);
-                return "The download was incomplete.";
+                return "Download incomplete.";
             }
             if (release.Sha256 is { } expected &&
                 !Convert.ToHexStringLower(hash.GetHashAndReset()).Equals(expected, StringComparison.OrdinalIgnoreCase))
             {
                 TryDelete(newPath);
-                return "The download didn't match the release's checksum.";
+                return "Download didn't match release's checksum.";
             }
 
             await EnterStageAsync(Stage.Installing);
@@ -168,17 +171,17 @@ internal static class UpdateInstaller
         catch (UnauthorizedAccessException)
         {
             TryDelete(newPath);
-            return $"Tinnitdown doesn't have permission to replace files in {Path.GetDirectoryName(exe)}.";
+            return $"Permission to replace files in {Path.GetDirectoryName(exe)} denied.";
         }
         catch (IOException)
         {
             TryDelete(newPath);
-            return "Tinnitdown's exe couldn't be replaced.";
+            return "Unable to replace exe.";
         }
         catch (Exception)
         {
             TryDelete(newPath);
-            return "The update couldn't be downloaded.";
+            return "Unable to download update.";
         }
     }
 
