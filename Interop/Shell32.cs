@@ -48,6 +48,14 @@ internal static partial class Shell32
 
     public const uint NOTIFYICON_VERSION_4 = 4;
 
+    // SHQueryUserNotificationState results that mean "don't pop anything up right now".
+    public const int QUNS_BUSY = 2;
+    public const int QUNS_RUNNING_D3D_FULL_SCREEN = 3;
+    public const int QUNS_PRESENTATION_MODE = 4;
+
+    [LibraryImport("shell32.dll")]
+    public static partial int SHQueryUserNotificationState(out int pquns);
+
     // NOTIFYICONDATAW contains fixed-size marshalled string fields, which source-generated
     // LibraryImport cannot marshal when nested in a struct (SYSLIB1051) -- classic DllImport
     // marshalling (ILC-generated, not reflection-based) still works under Native AOT.

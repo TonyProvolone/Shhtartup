@@ -8,6 +8,8 @@ internal static class TrayIcon
     private const string ClassName = "TinnitdownTrayWindowClass";
     private const uint WM_TRAY_CALLBACK = User32.WM_APP + 1;
     public const uint WM_UPDATE_CHECK_DONE = User32.WM_APP + 2;
+    public const uint WM_UPDATE_PROGRESS = User32.WM_APP + 3; // wParam: percent, lParam: UpdateInstaller.Stage
+    public const uint WM_UPDATE_INSTALL_DONE = User32.WM_APP + 4;
     private const uint WM_CONTEXTMENU = 0x007B;
     private const uint TrayIconId = 1;
 
@@ -156,10 +158,22 @@ internal static class TrayIcon
                 {
                     AudioVolumeController.Tick();
                 }
+                else if (wParam == TimerIds.UpdateCheckTimer)
+                {
+                    UpdateChecker.OnStartupTimer();
+                }
                 return 0;
 
             case WM_UPDATE_CHECK_DONE:
                 UpdateChecker.OnCheckDone();
+                return 0;
+
+            case WM_UPDATE_PROGRESS:
+                UpdateToast.SetProgress((UpdateInstaller.Stage)lParam, (int)wParam);
+                return 0;
+
+            case WM_UPDATE_INSTALL_DONE:
+                UpdateInstaller.OnInstallDone();
                 return 0;
 
             case User32.WM_DESTROY:

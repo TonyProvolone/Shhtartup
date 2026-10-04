@@ -16,6 +16,7 @@ Theme.Refresh();
 TrayIcon.Initialize();
 
 User32.SetTimer(TrayIcon.Hwnd, TimerIds.ScanTimer, 300, 0);
+User32.SetTimer(TrayIcon.Hwnd, TimerIds.UpdateCheckTimer, UpdateChecker.StartupDelayMs, 0);
 
 while (User32.GetMessageW(out var msg, 0, 0, 0) != 0)
 {

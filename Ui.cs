@@ -253,6 +253,41 @@ internal static class Fluent
         p.Text(text, f.Body, color, r, TextCenter);
     }
 
+    // --- Accent (primary) button: filled with the accent colour.
+
+    public static void AccentButton(Painter p, UiFonts f, UiRect r, string text, bool hover, bool pressed)
+    {
+        var t = Theme.P;
+        var fill = pressed ? t.Accent.Mix(t.WindowBg, 0.2f) : hover ? t.AccentHover : t.Accent;
+        p.FillRoundRect(r.X, r.Y, r.W, r.H, f.Px(4), fill);
+        p.Text(text, f.Body, pressed ? t.TextOnAccent.Mix(fill, 0.3f) : t.TextOnAccent, r, TextCenter);
+    }
+
+    // --- Progress bar: hairline track with a 3px accent indicator.
+
+    public static void ProgressBar(Painter p, UiFonts f, UiRect r, int percent)
+    {
+        var t = Theme.P;
+        var cy = r.Y + r.H / 2f;
+        var track = (float)f.Hairline;
+        var bar = (float)f.Px(3);
+        p.FillRoundRect(r.X, cy - track / 2, r.W, track, track / 2, t.SliderRail);
+        p.FillRoundRect(r.X, cy - bar / 2, r.W * Math.Clamp(percent, 0, 100) / 100f, bar, bar / 2, t.Accent);
+    }
+
+    // One short progress bar per step: finished steps full, the current one at its percent, later ones empty.
+    public static void StepProgressBar(Painter p, UiFonts f, UiRect r, int steps, int current, int percent)
+    {
+        var gap = f.Px(4);
+        var segment = (r.W - gap * (steps - 1)) / (float)steps;
+        for (var i = 0; i < steps; i++)
+        {
+            var fill = i < current ? 100 : i == current ? percent : 0;
+            var x = r.X + i * (segment + gap);
+            ProgressBar(p, f, new UiRect((int)MathF.Round(x), r.Y, (int)MathF.Round(segment), r.H), fill);
+        }
+    }
+
     // --- Text input frame: thin border with a stronger bottom line that turns into a 2px accent
     // underline while focused.
 

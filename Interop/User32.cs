@@ -115,6 +115,7 @@ internal static partial class User32
 
     public const uint WS_EX_TOOLWINDOW = 0x00000080;
     public const uint WS_EX_TOPMOST = 0x00000008;
+    public const uint WS_EX_NOACTIVATE = 0x08000000;
 
     public const int SW_HIDE = 0;
     public const int SW_SHOW = 5;
@@ -156,6 +157,7 @@ internal static partial class User32
     public const uint CS_DROPSHADOW = 0x00020000;
     public const int IDC_ARROW = 32512;
     public const uint SWP_NOZORDER = 0x0004;
+    public const uint MONITOR_DEFAULTTOPRIMARY = 1;
     public const uint MONITOR_DEFAULTTONEAREST = 2;
     public const nint DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = -4;
 
@@ -349,7 +351,15 @@ internal static partial class User32
     public static (MONITORINFO Info, uint Dpi) MonitorAtCursor()
     {
         GetCursorPos(out var pt);
-        var monitor = MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST);
+        return MonitorInfo(MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST));
+    }
+
+    // The primary monitor always contains (0, 0).
+    public static (MONITORINFO Info, uint Dpi) PrimaryMonitor() =>
+        MonitorInfo(MonitorFromPoint(default, MONITOR_DEFAULTTOPRIMARY));
+
+    private static (MONITORINFO Info, uint Dpi) MonitorInfo(nint monitor)
+    {
         var info = new MONITORINFO { cbSize = (uint)Marshal.SizeOf<MONITORINFO>() };
         GetMonitorInfoW(monitor, ref info);
         if (Shcore.GetDpiForMonitor(monitor, Shcore.MDT_EFFECTIVE_DPI, out var dpi, out _) != 0 || dpi == 0)
