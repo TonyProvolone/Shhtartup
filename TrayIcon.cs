@@ -7,6 +7,7 @@ internal static class TrayIcon
 {
     private const string ClassName = "TinnitdownTrayWindowClass";
     private const uint WM_TRAY_CALLBACK = User32.WM_APP + 1;
+    public const uint WM_UPDATE_CHECK_DONE = User32.WM_APP + 2;
     private const uint WM_CONTEXTMENU = 0x007B;
     private const uint TrayIconId = 1;
 
@@ -84,6 +85,23 @@ internal static class TrayIcon
         Shell32.Shell_NotifyIconW(Shell32.NIM_MODIFY, ref data);
     }
 
+    // Windows notification attached to the tray icon (a toast on Windows 10/11).
+    public static void ShowNotification(string title, string text, bool warning)
+    {
+        var data = new NOTIFYICONDATAW
+        {
+            cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
+            hWnd = Hwnd,
+            uID = TrayIconId,
+            uFlags = Shell32.NIF_INFO,
+            szTip = string.Empty,
+            szInfo = text,
+            szInfoTitle = title,
+            dwInfoFlags = warning ? Shell32.NIIF_WARNING : Shell32.NIIF_INFO,
+        };
+        Shell32.Shell_NotifyIconW(Shell32.NIM_MODIFY, ref data);
+    }
+
     public static void ExitApp()
     {
         RemoveTrayIcon();
@@ -114,6 +132,10 @@ internal static class TrayIcon
             {
                 ShowContextMenu();
             }
+            else if (mouseMsg == Shell32.NIN_BALLOONUSERCLICK)
+            {
+                UpdateChecker.OnNotificationClicked();
+            }
             return 0;
         }
 
@@ -134,6 +156,10 @@ internal static class TrayIcon
                 {
                     AudioVolumeController.Tick();
                 }
+                return 0;
+
+            case WM_UPDATE_CHECK_DONE:
+                UpdateChecker.OnCheckDone();
                 return 0;
 
             case User32.WM_DESTROY:

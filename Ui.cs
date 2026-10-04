@@ -153,6 +153,7 @@ internal static class Fluent
     public const char GlyphVolume = '';
     public const char GlyphSettings = '';
     public const char GlyphPower = '';
+    public const char GlyphUpdate = ''; // Sync
     public const char GlyphChevronUp = '';
     public const char GlyphChevronDown = '';
 

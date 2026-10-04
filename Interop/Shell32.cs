@@ -38,6 +38,13 @@ internal static partial class Shell32
     // Required under NOTIFYICON_VERSION_4 to show the standard tooltip (otherwise it's suppressed
     // in favour of an app-drawn UI). https://learn.microsoft.com/windows/win32/api/shellapi/ns-shellapi-notifyicondataw
     public const uint NIF_SHOWTIP = 0x00000080;
+    public const uint NIF_INFO = 0x00000010;
+
+    public const uint NIIF_INFO = 0x00000001;
+    public const uint NIIF_WARNING = 0x00000002;
+
+    // Sent to the tray callback (low word of lParam under version 4) when a notification is clicked.
+    public const uint NIN_BALLOONUSERCLICK = 0x0405;
 
     public const uint NOTIFYICON_VERSION_4 = 4;
 

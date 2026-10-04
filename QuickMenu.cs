@@ -4,7 +4,7 @@ using Tinnitdown.Interop;
 namespace Tinnitdown;
 
 // Windows 11-style flyout shown on right-click of the tray icon: a volume header, a Fluent slider and
-// two menu items. Native popup menus (TrackPopupMenuEx) can't host a slider, so this is a custom-drawn
+// three menu items. Native popup menus (TrackPopupMenuEx) can't host a slider, so this is a custom-drawn
 // popup window that dismisses itself when it loses focus, like a real menu.
 internal static class QuickMenu
 {
@@ -12,7 +12,7 @@ internal static class QuickMenu
 
     // Layout in device-independent pixels.
     private const int WidthDip = 280;
-    private const int HeightDip = 166;
+    private const int HeightDip = 202;
     private const int PadDip = 16;
     private const int IconBoxDip = 20;
     private const int TextXDip = 46;
@@ -26,7 +26,7 @@ internal static class QuickMenu
     private const int RowInsetDip = 4;
     private const int GapDip = 8;
 
-    private enum Part { None, Slider, Settings, Exit }
+    private enum Part { None, Slider, Settings, Updates, Exit }
 
     private static nint _hwnd;
     private static UiFonts? _fonts;
@@ -207,6 +207,10 @@ internal static class QuickMenu
         }
         if (RowRect(f, w, 1).Contains(x, y))
         {
+            return Part.Updates;
+        }
+        if (RowRect(f, w, 2).Contains(x, y))
+        {
             return Part.Exit;
         }
         return Part.None;
@@ -284,6 +288,11 @@ internal static class QuickMenu
         {
             Hide();
             SettingsWindow.Show();
+        }
+        else if (released == Part.Updates)
+        {
+            Hide();
+            UpdateChecker.CheckNow();
         }
         else if (released == Part.Exit)
         {
@@ -380,7 +389,8 @@ internal static class QuickMenu
             p.FillRect(0, f.Px(DividerYDip), w, f.Hairline, t.Divider);
 
             DrawRow(p, f, w, 0, Fluent.GlyphSettings, "Settings", Part.Settings);
-            DrawRow(p, f, w, 1, Fluent.GlyphPower, "Exit", Part.Exit);
+            DrawRow(p, f, w, 1, Fluent.GlyphUpdate, "Check for updates", Part.Updates);
+            DrawRow(p, f, w, 2, Fluent.GlyphPower, "Exit", Part.Exit);
         }
     }
 

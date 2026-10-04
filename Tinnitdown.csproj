@@ -8,6 +8,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>Tinnitdown</AssemblyName>
     <RootNamespace>Tinnitdown</RootNamespace>
+    <!-- Compared against the GitHub release tag (e.g. v1.0.1) by "Check for updates". -->
+    <Version>1.0.0</Version>
 
     <PublishAot>true</PublishAot>
     <SelfContained>true</SelfContained>
