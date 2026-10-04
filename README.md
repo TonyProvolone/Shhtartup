@@ -23,22 +23,22 @@ The app isn't code-signed, so Windows SmartScreen may warn you the first time yo
 
 ## How to use
 
-Tinnitdown runs minimized in your system tray. Right-click the tray icon to:
+Tinnitdown runs minimized in your system tray.
+
+Right-click the tray icon to:
 - **Set the default volume** (default 25%)
 - Open **Settings**
   - Toggle *Run on startup*
   - Clear any saved games/apps
-- **Check for updates** or **Exit**
+- **Check for updates**
+- **Exit**
 
 ## How to update
 
-Tinnitdown checks for a new version every time it starts.
-- **Install and restart**: updates and reopens Tinnitdown right away.
-- **Install and restart later**: updates now, and the new version runs the next time Tinnitdown starts.
-- **Remind me later**: asks again the next time Tinnitdown starts.
+Tinnitdown checks for new versions on startup however you can always check for updates manually.
 
-You can also right-click the tray icon and choose **Check for updates**, or download the latest
-version above and run it. It installs over your existing copy, in the same folder.
+### Manual
+Rick-click the tray icon and click  **Check for updates**
 
 ## How to uninstall
 
