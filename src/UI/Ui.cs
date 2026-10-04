@@ -133,6 +133,12 @@ internal sealed class Painter : IDisposable
         Gdi32.SelectObject(_dc, oldFont);
     }
 
+    public void Icon(nint icon, int x, int y, int size)
+    {
+        Gdiplus.GdipFlush(_graphics, Gdiplus.FlushIntentionSync);
+        User32.DrawIconEx(_dc, x, y, icon, size, size, 0, 0, User32.DI_NORMAL);
+    }
+
     public int MeasureText(string text, nint font)
     {
         var oldFont = Gdi32.SelectObject(_dc, font);

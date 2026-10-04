@@ -242,6 +242,34 @@ internal static partial class User32
     [LibraryImport("user32.dll")]
     public static partial uint GetDpiForSystem();
 
+    public const uint DI_NORMAL = 0x0003;
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool DrawIconEx(nint hdc, int xLeft, int yTop, nint hIcon, int cxWidth, int cyWidth, uint istepIfAniCur, nint hbrFlickerFreeDraw, uint diFlags);
+
+    // Click-through overlays: WS_EX_LAYERED + WS_EX_TRANSPARENT let mouse input fall through to
+    // whatever is underneath, even in other processes.
+    public const uint WS_EX_LAYERED = 0x00080000;
+    public const uint WS_EX_TRANSPARENT = 0x00000020;
+    public const uint LWA_ALPHA = 0x00000002;
+    public const uint WM_NCHITTEST = 0x0084;
+    public const nint HTTRANSPARENT = -1;
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool SetLayeredWindowAttributes(nint hwnd, uint crKey, byte bAlpha, uint dwFlags);
+
+    // Takes ownership of hRgn.
+    [LibraryImport("user32.dll")]
+    public static partial int SetWindowRgn(nint hWnd, nint hRgn, [MarshalAs(UnmanagedType.Bool)] bool bRedraw);
+
+    [LibraryImport("user32.dll")]
+    public static partial nint GetForegroundWindow();
+
+    [LibraryImport("user32.dll")]
+    public static partial nint MonitorFromWindow(nint hwnd, uint dwFlags);
+
     [LibraryImport("user32.dll")]
     public static partial int GetSystemMetricsForDpi(int nIndex, uint dpi);
 
@@ -383,6 +411,13 @@ internal static partial class User32
     {
         GetCursorPos(out var pt);
         return MonitorInfo(MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST));
+    }
+
+    // Monitor showing the active window (e.g. the game that just started), else the primary one.
+    public static (MONITORINFO Info, uint Dpi) MonitorOfForegroundWindow()
+    {
+        var hwnd = GetForegroundWindow();
+        return hwnd == 0 ? PrimaryMonitor() : MonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY));
     }
 
     // The primary monitor always contains (0, 0).

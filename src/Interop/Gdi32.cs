@@ -45,6 +45,10 @@ internal static partial class Gdi32
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool BitBlt(nint hdc, int x, int y, int cx, int cy, nint hdcSrc, int x1, int y1, uint rop);
 
+    // w and h are the ellipse used for the corners (twice the corner radius).
+    [LibraryImport("gdi32.dll")]
+    public static partial nint CreateRoundRectRgn(int x1, int y1, int x2, int y2, int w, int h);
+
     [LibraryImport("gdi32.dll", EntryPoint = "CreateFontW", StringMarshalling = StringMarshalling.Utf16)]
     public static partial nint CreateFontW(
         int cHeight, int cWidth, int cEscapement, int cOrientation, int cWeight,

@@ -96,6 +96,7 @@ internal static class AudioVolumeController
                             KnownGames.Record(target.Path, target.Name, target.Source);
                         }
                         _pending.RemoveAt(i);
+                        VolumeToast.Show(Settings.Current.DefaultVolumePercent);
                         continue;
                     }
                 }
