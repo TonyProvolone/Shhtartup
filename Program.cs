@@ -16,7 +16,10 @@ Theme.Refresh();
 TrayIcon.Initialize();
 
 User32.SetTimer(TrayIcon.Hwnd, TimerIds.ScanTimer, 300, 0);
+#if !DEBUG
+// Debug builds skip this so a dev build isn't offered (and replaced by) the latest release.
 User32.SetTimer(TrayIcon.Hwnd, TimerIds.UpdateCheckTimer, UpdateChecker.StartupDelayMs, 0);
+#endif
 
 while (User32.GetMessageW(out var msg, 0, 0, 0) != 0)
 {
