@@ -15,18 +15,20 @@ DISCLAIMER: This was totally written using AI because I'm a lowly front end web 
 [![Download Latest Version](https://img.shields.io/badge/Download-Latest%20Version-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/TonyProvolone/Tinnitdown/releases/latest/download/Tinnitdown.exe)
 
 1. Download the latest version above and run it.
-2. Choose where to install Tinnitdown (the default is fine), whether you want a desktop shortcut and
-   to start it with Windows, then click **Install**.
-3. Its icon appears in the system tray (click `^` on the taskbar if it's hidden).
+2. Choose where to install, whether you want a desktop shortcut and
+   Windows startup, then click **Install**.
+3. Tinnitdown starts and runs in the system tray.
 
 The app isn't code-signed, so Windows SmartScreen may warn you the first time you run the installer. If so, click **More info** → **Run anyway**.
 
 ## How to use
 
-Tinnitdown runs minimized to your system tray. Right-click its tray icon to:
-- **Set the default volume** of your choice (default 25%).
-- Open **Settings** to turn *Run on startup* on or off, or to clear the remembered games/apps.
-- **Check for updates** or **Exit**.
+Tinnitdown runs minimized in your system tray. Right-click the tray icon to:
+- **Set the default volume** (default 25%)
+- Open **Settings**
+  - Toggle *Run on startup*
+  - Clear any saved games/apps
+- **Check for updates** or **Exit**
 
 ## How to update
 
