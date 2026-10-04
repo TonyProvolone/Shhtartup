@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 // Small Windows 11-style card in the bottom-right corner offering an available update. Tray
 // notifications can't host buttons, so like QuickMenu this is a custom-drawn popup. It never takes
@@ -9,7 +9,7 @@ namespace Tinnitdown;
 // fullscreen app or presentation is running before appearing.
 internal static class UpdateToast
 {
-    private const string ClassName = "TinnitdownUpdateToastClass";
+    private const string ClassName = "ShhtartupUpdateToastClass";
 
     // Layout in device-independent pixels.
     private const int WidthDip = 360;
@@ -123,7 +123,7 @@ internal static class UpdateToast
 
         _hwnd = User32.CreateWindowExW(
             User32.WS_EX_TOOLWINDOW | User32.WS_EX_TOPMOST | User32.WS_EX_NOACTIVATE,
-            ClassName, "Tinnitdown update", User32.WS_POPUP,
+            ClassName, "Shhtartup update", User32.WS_POPUP,
             0, 0, 1, 1, 0, 0, hInstance, 0);
     }
 

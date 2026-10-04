@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Tinnitdown.Interop;
+namespace Shhtartup.Interop;
 
 [StructLayout(LayoutKind.Sequential)]
 internal struct GdiplusStartupInput

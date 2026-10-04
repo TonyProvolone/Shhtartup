@@ -1,6 +1,6 @@
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal readonly record struct UiRect(int X, int Y, int W, int H)
 {

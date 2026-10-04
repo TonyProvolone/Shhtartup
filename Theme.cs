@@ -1,7 +1,7 @@
 using Microsoft.Win32;
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal readonly record struct Rgb(byte R, byte G, byte B)
 {

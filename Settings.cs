@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal sealed class AppSettings
 {
@@ -20,7 +20,7 @@ internal static class Settings
 
     private static readonly string FilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "Tinnitdown", "settings.json");
+        "Shhtartup", "settings.json");
 
     public static void Load()
     {

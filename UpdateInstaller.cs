@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 // Downloads a release's exe next to the running one and swaps them. Windows lets a running exe be
-// renamed (not overwritten), so the current file becomes Tinnitdown.exe.old and the download takes its
+// renamed (not overwritten), so the current file becomes Shhtartup.exe.old and the download takes its
 // name -- the new version runs from the next launch, or right away if the user chose to restart.
 // The .old file is deleted on the next launch, once nothing is running from it.
 internal static class UpdateInstaller
@@ -90,7 +90,7 @@ internal static class UpdateInstaller
             }
         }
 
-        UpdateChecker.Notify("Update installed", $"{release.Version} starts the next time you open Tinnitdown.");
+        UpdateChecker.Notify("Update installed", $"{release.Version} starts the next time you open Shhtartup.");
     }
 
     // Returns null on success, or a sentence describing what went wrong.

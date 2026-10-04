@@ -1,15 +1,15 @@
 using System.Runtime.InteropServices;
 using System.Text;
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 // Windows 11 Settings-style window: three cards with a custom-drawn Fluent slider, number box,
 // toggle switch and button. The only native control is the edit box inside the number box, so
 // typing, selection and clipboard work as usual.
 internal static class SettingsWindow
 {
-    private const string ClassName = "TinnitdownSettingsWindowClass";
+    private const string ClassName = "ShhtartupSettingsWindowClass";
     private const int EditId = 101;
     private const int IDCANCEL = 2;
 
@@ -577,7 +577,7 @@ internal static class SettingsWindow
             // Run on startup.
             Fluent.Card(p, f, CardRect(f, StartupCardYDip, SmallCardHDip));
             CardText(p, f, StartupCardYDip + 15, ToggleXDip - ToggleLabelWDip,
-                "Run on startup", "Start Tinnitdown automatically on startup");
+                "Run on startup", "Start Shhtartup automatically on startup");
             var toggle = ToggleRect(f);
             p.Text(_autoStart ? "On" : "Off", f.Body, t.TextPrimary,
                 new UiRect(toggle.X - f.Px(ToggleLabelWDip), toggle.Y, f.Px(ToggleLabelWDip - 12), toggle.H), Fluent.TextRight);

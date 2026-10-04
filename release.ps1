@@ -1,6 +1,6 @@
-# Publishes a Tinnitdown release:
+# Publishes a Shhtartup release:
 #   1. asks for the version number (plain numbers, e.g. 0.1.0 -- never a leading "v")
-#   2. writes it into Tinnitdown.csproj and app.manifest
+#   2. writes it into Shhtartup.csproj and app.manifest
 #   3. builds the Native AOT exe
 #   4. opens RELEASE_NOTES.md in VS Code and waits for you to save and close it
 #   5. commits everything, tags the version, pushes, and creates the GitHub release with the exe
@@ -15,11 +15,11 @@
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 
-$Repo = 'TonyProvolone/Tinnitdown'
-$Project = 'Tinnitdown.csproj'
+$Repo = 'TonyProvolone/Shhtartup'
+$Project = 'Shhtartup.csproj'
 $Manifest = 'app.manifest'
 $NotesFile = 'RELEASE_NOTES.md'
-$ExeName = 'Tinnitdown.exe'
+$ExeName = 'Shhtartup.exe'
 $FirstVersion = '0.1.0'
 
 # The README's "Download Latest Version" button. GitHub redirects this to the newest release's asset
@@ -28,7 +28,7 @@ $LatestDownloadUrl = "https://github.com/$Repo/releases/latest/download/$ExeName
 
 $NotesTemplate = @'
 <!--
-  Release notes for Tinnitdown {VERSION}. This becomes the GitHub release description.
+  Release notes for Shhtartup {VERSION}. This becomes the GitHub release description.
   Write your notes, then SAVE and CLOSE this tab to continue the release.
   Sections left empty are removed, and so is this comment.
 -->
@@ -117,7 +117,7 @@ function Get-RedirectTarget([string]$url) {
     $request = [Net.HttpWebRequest]::Create($url)
     $request.Method = 'HEAD'
     $request.AllowAutoRedirect = $false
-    $request.UserAgent = 'Tinnitdown-release-script'
+    $request.UserAgent = 'Shhtartup-release-script'
     try { $response = $request.GetResponse() }
     catch [Net.WebException] { $response = $_.Exception.Response }
     if (-not $response) { return $null }
@@ -247,7 +247,7 @@ function Invoke-Release {
     Write-Host '-------------------------' -ForegroundColor DarkGray
     Write-Host ''
     Write-Host "    This commits ALL changes on '$branch', tags $version, pushes to GitHub and publishes the release."
-    $confirm = Read-Host "    Publish Tinnitdown $version now? [y/N]"
+    $confirm = Read-Host "    Publish Shhtartup $version now? [y/N]"
     if ($confirm -notmatch '^[yY]') { Fail "Cancelled. Your notes are kept in $NotesFile for next time." }
 
     Step 'Committing and tagging'
@@ -255,7 +255,7 @@ function Invoke-Release {
     Invoke-Checked 'git commit' { git commit -m "Release $version" }
     $script:Committed = $true
     $script:Originals = @{}
-    Invoke-Checked 'git tag' { git tag -a $version -m "Tinnitdown $version" }
+    Invoke-Checked 'git tag' { git tag -a $version -m "Shhtartup $version" }
 
     Step 'Pushing to GitHub'
     $push = { git push --atomic origin $branch "refs/tags/$version" }
@@ -263,14 +263,14 @@ function Invoke-Release {
     if ($LASTEXITCODE -ne 0) {
         Fail ("The push failed. The release is committed and tagged locally; once it's fixed, run:`n" +
             "      git push --atomic origin $branch refs/tags/$version`n" +
-            "      gh release create $version `"$exe`" --repo $Repo --title `"Tinnitdown $version`" --notes-file $NotesFile --verify-tag")
+            "      gh release create $version `"$exe`" --repo $Repo --title `"Shhtartup $version`" --notes-file $NotesFile --verify-tag")
     }
 
     Step 'Creating the GitHub release'
-    & gh release create $version $exe --repo $Repo --title "Tinnitdown $version" --notes-file $NotesFile --verify-tag --latest
+    & gh release create $version $exe --repo $Repo --title "Shhtartup $version" --notes-file $NotesFile --verify-tag --latest
     if ($LASTEXITCODE -ne 0) {
         Fail ("Creating the release failed. The tag is already on GitHub; once it's fixed, run:`n" +
-            "      gh release create $version `"$exe`" --repo $Repo --title `"Tinnitdown $version`" --notes-file $NotesFile --verify-tag")
+            "      gh release create $version `"$exe`" --repo $Repo --title `"Shhtartup $version`" --notes-file $NotesFile --verify-tag")
     }
 
     Step 'Checking the README download button'
@@ -283,7 +283,7 @@ function Invoke-Release {
 
     $url = "https://github.com/$Repo/releases/tag/$version"
     Write-Host ''
-    Write-Host "Released Tinnitdown $version" -ForegroundColor Green
+    Write-Host "Released Shhtartup $version" -ForegroundColor Green
     Write-Host "    Release:  $url"
     Write-Host "    Download: $LatestDownloadUrl"
     Start-Process $url

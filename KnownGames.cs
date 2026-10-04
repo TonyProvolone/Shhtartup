@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal sealed class KnownGame
 {
@@ -31,7 +31,7 @@ internal static class KnownGames
 
     private static readonly string FilePath = System.IO.Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "Tinnitdown", "known-games.json");
+        "Shhtartup", "known-games.json");
 
     public static int Count => _byPath.Count;
 

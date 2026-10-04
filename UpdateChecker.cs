@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal sealed record ReleaseInfo(Version Version, string PageUrl, string? DownloadUrl, long Size, string? Sha256);
 
@@ -12,10 +12,10 @@ internal sealed record ReleaseInfo(Version Version, string PageUrl, string? Down
 // on demand from "Check for updates" in the tray menu (every outcome is reported).
 internal static class UpdateChecker
 {
-    private const string Repo = "TonyProvolone/Tinnitdown";
+    private const string Repo = "TonyProvolone/Shhtartup";
     private const string LatestReleaseUrl = $"https://api.github.com/repos/{Repo}/releases/latest";
     private const string ReleasesPageUrl = $"https://github.com/{Repo}/releases";
-    private const string AssetName = "Tinnitdown.exe";
+    private const string AssetName = "Shhtartup.exe";
 
     public const uint StartupDelayMs = 5_000;
     private const uint RetryDelayMs = 60_000;
@@ -132,7 +132,7 @@ internal static class UpdateChecker
         {
             // The release has no exe attached -- point at the release page instead.
             Notify("Update available",
-                $"Tinnitdown {release.Version} is available (you have {CurrentVersion}). Click to view.",
+                $"Shhtartup {release.Version} is available (you have {CurrentVersion}). Click to view.",
                 clickUrl: release.PageUrl);
             return;
         }
@@ -169,7 +169,7 @@ internal static class UpdateChecker
     {
         var http = new HttpClient { Timeout = timeout };
         // GitHub's API rejects requests without a User-Agent.
-        http.DefaultRequestHeaders.UserAgent.ParseAdd($"Tinnitdown/{CurrentVersion}");
+        http.DefaultRequestHeaders.UserAgent.ParseAdd($"Shhtartup/{CurrentVersion}");
         return http;
     }
 
@@ -211,7 +211,7 @@ internal static class UpdateChecker
         }
     }
 
-    // Prefers an asset named Tinnitdown.exe, else the first .exe attached to the release.
+    // Prefers an asset named Shhtartup.exe, else the first .exe attached to the release.
     private static (string? Url, long Size, string? Sha256) FindExeAsset(JsonElement release)
     {
         if (!release.TryGetProperty("assets", out var assets) || assets.ValueKind != JsonValueKind.Array)

@@ -1,14 +1,14 @@
 using System.Diagnostics;
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 // One tray app per user session. A second launch just opens the running copy's Settings window.
 // The installer and updater also use this to close the running copy before replacing its exe.
 internal static class SingleInstance
 {
-    private const string MutexName = @"Local\Tinnitdown.Instance";
-    private const string TrayClassName = "TinnitdownTrayWindowClass";
+    private const string MutexName = @"Local\Shhtartup.Instance";
+    private const string TrayClassName = "ShhtartupTrayWindowClass";
 
     private static Mutex? _mutex;
 

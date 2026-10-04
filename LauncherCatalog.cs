@@ -1,6 +1,6 @@
 using System.Collections.Frozen;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal static class LauncherCatalog
 {

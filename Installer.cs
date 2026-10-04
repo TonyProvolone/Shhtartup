@@ -1,40 +1,40 @@
 using System.Diagnostics;
 using Microsoft.Win32;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal readonly record struct InstallOptions(bool DesktopShortcut, bool StartWithWindows);
 
-// Tinnitdown.exe is its own installer. Run from anywhere other than the install folder:
+// Shhtartup.exe is its own installer. Run from anywhere other than the install folder:
 //   - not installed yet: the setup window asks where to install, then the copy there starts;
 //   - already installed: it installs over the saved folder without asking, then starts that copy.
 // Installing registers the app under Settings > Apps (per-user, no admin) with "--uninstall" as its
 // uninstall command, and adds a Start menu shortcut.
 internal static class Installer
 {
-    public const string ExeName = "Tinnitdown.exe";
+    public const string ExeName = "Shhtartup.exe";
     public const string AfterInstallArg = "--after-install";
     public const string UninstallArg = "--uninstall";
 
-    private const string UninstallKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\Tinnitdown";
-    private const string RepoUrl = "https://github.com/TonyProvolone/Tinnitdown";
+    private const string UninstallKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\Shhtartup";
+    private const string RepoUrl = "https://github.com/TonyProvolone/Shhtartup";
 
     public static string DefaultLocation { get; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Tinnitdown");
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Shhtartup");
 
     // Settings, remembered games and their backups.
     private static readonly string DataDir = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Tinnitdown");
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Shhtartup");
 
     private static readonly string StartMenuShortcut = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.Programs), "Tinnitdown.lnk");
+        Environment.GetFolderPath(Environment.SpecialFolder.Programs), "Shhtartup.lnk");
 
     private static readonly string DesktopShortcut = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "Tinnitdown.lnk");
+        Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "Shhtartup.lnk");
 
-    // Everything Tinnitdown (or its updater) ever puts in the install folder.
+    // Everything Shhtartup (or its updater) ever puts in the install folder.
     private static readonly string[] ProgramFiles =
-        [ExeName, ExeName + ".old", ExeName + ".new", "Tinnitdown.pdb"];
+        [ExeName, ExeName + ".old", ExeName + ".new", "Shhtartup.pdb"];
 
     // Returns true if this process should go on to run the tray app.
     public static bool RunSetupIfNeeded()
@@ -138,11 +138,11 @@ internal static class Installer
         }
         catch (UnauthorizedAccessException)
         {
-            return $"Tinnitdown doesn't have permission to write to {folder}. Choose a folder in your user folder instead.";
+            return $"Shhtartup doesn't have permission to write to {folder}. Choose a folder in your user folder instead.";
         }
         catch (Exception)
         {
-            return $"Tinnitdown couldn't be installed to {folder}. Check the folder and try again.";
+            return $"Shhtartup couldn't be installed to {folder}. Check the folder and try again.";
         }
     }
 
@@ -187,7 +187,7 @@ internal static class Installer
             "All settings have removed.", success: true);
 
         // This exe is still running, so it can't delete itself or its folder. A hidden cmd.exe does
-        // it a moment after this process exits. Only Tinnitdown's own files are deleted, and the
+        // it a moment after this process exits. Only Shhtartup's own files are deleted, and the
         // folder only if that leaves it empty, in case it was shared with other files.
         DeleteAfterExit(folder);
     }
@@ -213,10 +213,10 @@ internal static class Installer
     private static void Register(string exe)
     {
         using var key = Registry.CurrentUser.CreateSubKey(UninstallKeyPath);
-        key.SetValue("DisplayName", "Tinnitdown");
+        key.SetValue("DisplayName", "Shhtartup");
         key.SetValue("DisplayVersion", UpdateChecker.CurrentVersion.ToString());
         key.SetValue("DisplayIcon", exe);
-        key.SetValue("Publisher", "Tinnitdown");
+        key.SetValue("Publisher", "Shhtartup");
         key.SetValue("InstallLocation", Path.GetDirectoryName(exe)!);
         key.SetValue("InstallDate", DateTime.Now.ToString("yyyyMMdd"));
         key.SetValue("UninstallString", $"\"{exe}\" {UninstallArg}");

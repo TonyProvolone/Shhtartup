@@ -1,6 +1,6 @@
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal static class Program
 {
@@ -58,11 +58,11 @@ internal static class Program
         if (afterInstall)
         {
             TrayIcon.ShowNotification("Installation successful",
-                "Tinnitdown is now running in the system tray. Right-click to change the volume or adjust settings.", warning: false);
+                "Shhtartup is now running in the system tray. Right-click to change the volume or adjust settings.", warning: false);
         }
         else if (afterUpdate)
         {
-            TrayIcon.ShowNotification("Tinnitdown updated", $"Now on version {UpdateChecker.CurrentVersion}.", warning: false);
+            TrayIcon.ShowNotification("Shhtartup updated", $"Now on version {UpdateChecker.CurrentVersion}.", warning: false);
         }
 
         User32.SetTimer(TrayIcon.Hwnd, TimerIds.ScanTimer, 300, 0);

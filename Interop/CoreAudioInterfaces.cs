@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 
-namespace Tinnitdown.Interop;
+namespace Shhtartup.Interop;
 
 internal enum EDataFlow
 {

@@ -1,14 +1,14 @@
 using System.Runtime.InteropServices;
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 // Windows 11-style flyout shown on right-click of the tray icon: a volume header, a Fluent slider and
 // three menu items. Native popup menus (TrackPopupMenuEx) can't host a slider, so this is a custom-drawn
 // popup window that dismisses itself when it loses focus, like a real menu.
 internal static class QuickMenu
 {
-    private const string ClassName = "TinnitdownQuickMenuClass";
+    private const string ClassName = "ShhtartupQuickMenuClass";
 
     // Layout in device-independent pixels.
     private const int WidthDip = 280;
@@ -95,7 +95,7 @@ internal static class QuickMenu
         }
 
         _hwnd = User32.CreateWindowExW(
-            User32.WS_EX_TOOLWINDOW | User32.WS_EX_TOPMOST, ClassName, "Tinnitdown", User32.WS_POPUP,
+            User32.WS_EX_TOOLWINDOW | User32.WS_EX_TOPMOST, ClassName, "Shhtartup", User32.WS_POPUP,
             0, 0, 1, 1, 0, 0, hInstance, 0);
     }
 

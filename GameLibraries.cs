@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Win32;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 // Recognises games by where they're installed, as a fallback for when the launcher process chain
 // can't be traced (game started from its own exe or a desktop shortcut, or launched through a helper

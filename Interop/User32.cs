@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 
-namespace Tinnitdown.Interop;
+namespace Shhtartup.Interop;
 
 [StructLayout(LayoutKind.Sequential)]
 internal struct MSG

@@ -1,6 +1,6 @@
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal static class AudioVolumeController
 {

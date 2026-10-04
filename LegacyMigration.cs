@@ -1,4 +1,4 @@
-namespace Tinnitdown;
+namespace Shhtartup;
 
 // Carries settings over from the app's previous name (VolumeGuard): its AppData folder (settings and
 // remembered games) and its "Run on startup" entry. Runs on every launch; does nothing once migrated.
@@ -12,7 +12,7 @@ internal static class LegacyMigration
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var legacyDir = Path.Combine(appData, LegacyName);
-            var currentDir = Path.Combine(appData, "Tinnitdown");
+            var currentDir = Path.Combine(appData, "Shhtartup");
             if (Directory.Exists(legacyDir) && !Directory.Exists(currentDir))
             {
                 Directory.Move(legacyDir, currentDir);

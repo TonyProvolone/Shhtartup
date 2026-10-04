@@ -1,11 +1,11 @@
 using System.Runtime.InteropServices;
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal static class TrayIcon
 {
-    private const string ClassName = "TinnitdownTrayWindowClass";
+    private const string ClassName = "ShhtartupTrayWindowClass";
     private const uint WM_TRAY_CALLBACK = User32.WM_APP + 1;
     public const uint WM_UPDATE_CHECK_DONE = User32.WM_APP + 2;
     public const uint WM_UPDATE_PROGRESS = User32.WM_APP + 3; // wParam: percent, lParam: UpdateInstaller.Stage
@@ -40,7 +40,7 @@ internal static class TrayIcon
         }
 
         Hwnd = User32.CreateWindowExW(
-            0, ClassName, "Tinnitdown", 0,
+            0, ClassName, "Shhtartup", 0,
             0, 0, 0, 0,
             User32.HWND_MESSAGE, 0, _hInstance, 0);
 
@@ -70,7 +70,7 @@ internal static class TrayIcon
         Shell32.Shell_NotifyIconW(Shell32.NIM_SETVERSION, ref data);
     }
 
-    private static string TooltipText() => $"Tinnitdown: {Settings.Current.DefaultVolumePercent}%";
+    private static string TooltipText() => $"Shhtartup: {Settings.Current.DefaultVolumePercent}%";
 
     // Refresh the hover tooltip after a volume change. Called from both UIs via Settings changes.
     public static void UpdateTooltip()

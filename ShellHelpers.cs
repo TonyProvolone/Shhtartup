@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 // The Windows folder picker and .lnk shortcuts, via the shell's COM objects.
 internal static class ShellHelpers

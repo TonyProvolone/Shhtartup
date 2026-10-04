@@ -1,11 +1,11 @@
 using Microsoft.Win32;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal static class AutoStart
 {
     private const string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string ValueName = "Tinnitdown";
+    private const string ValueName = "Shhtartup";
 
     public static bool IsEnabled()
     {

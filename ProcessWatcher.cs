@@ -1,6 +1,6 @@
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 internal static class ProcessWatcher
 {
@@ -25,7 +25,7 @@ internal static class ProcessWatcher
         var now = Environment.TickCount64;
         if (now >= _nextLibraryRefresh)
         {
-            // Picks up games installed while Tinnitdown is running.
+            // Picks up games installed while Shhtartup is running.
             GameLibraries.Refresh();
             _nextLibraryRefresh = now + LibraryRefreshMs;
         }
@@ -41,7 +41,7 @@ internal static class ProcessWatcher
         if (!_initialized)
         {
             // Baseline run: learn the existing launcher process trees, but don't touch the volume of
-            // anything that was already running before Tinnitdown started.
+            // anything that was already running before Shhtartup started.
             foreach (var pid in currentPids)
             {
                 if (IsLauncherDescendant(pid, snapshot))

@@ -1,14 +1,14 @@
 using System.Runtime.InteropServices;
-using Tinnitdown.Interop;
+using Shhtartup.Interop;
 
-namespace Tinnitdown;
+namespace Shhtartup;
 
 // Small Fluent-styled dialog for installing and uninstalling, run modally (with its own message loop)
 // before the tray app starts. Three layouts: choose an install folder, confirm an uninstall, or a
 // plain message with a Close button.
 internal static class SetupWindow
 {
-    private const string ClassName = "TinnitdownSetupWindowClass";
+    private const string ClassName = "ShhtartupSetupWindowClass";
 
     // Layout in device-independent pixels.
     private const int ClientWDip = 480;
@@ -65,26 +65,26 @@ internal static class SetupWindow
     private static bool _desktopShortcut;
     private static bool _startWithWindows;
 
-    // Returns the folder Tinnitdown was installed to, or null if the user cancelled.
+    // Returns the folder Shhtartup was installed to, or null if the user cancelled.
     public static string? RunInstall(string defaultFolder)
     {
-        _title = "Install Tinnitdown";
-        _text = "Choose where to install Tinnitdown.";
+        _title = "Install Shhtartup";
+        _text = "Choose where to install Shhtartup.";
         _glyph = GlyphDownload;
         _path = defaultFolder;
         _desktopShortcut = true;
         _startWithWindows = true;
         _error = null;
-        RunModal(Mode.Install, "Tinnitdown Setup", InstallHDip);
+        RunModal(Mode.Install, "Shhtartup Setup", InstallHDip);
         return _accepted ? _path : null;
     }
 
     public static bool ConfirmUninstall()
     {
-        _title = "Uninstall Tinnitdown?";
-        _text = "This removes Tinnitdown along with ALL of its settings. This action cannot be undone.";
+        _title = "Uninstall Shhtartup?";
+        _text = "This removes Shhtartup along with ALL of its settings. This action cannot be undone.";
         _glyph = GlyphWarning;
-        RunModal(Mode.Confirm, "Uninstall Tinnitdown", ConfirmHDip);
+        RunModal(Mode.Confirm, "Uninstall Shhtartup", ConfirmHDip);
         return _accepted;
     }
 
@@ -94,7 +94,7 @@ internal static class SetupWindow
         _text = text;
         _success = success;
         _glyph = success ? GlyphDone : GlyphError;
-        RunModal(Mode.Message, "Tinnitdown", MessageHDip);
+        RunModal(Mode.Message, "Shhtartup", MessageHDip);
     }
 
     private static void RunModal(Mode mode, string caption, int clientHDip)
@@ -347,16 +347,16 @@ internal static class SetupWindow
 
     private static void Browse(nint hwnd)
     {
-        var picked = ShellHelpers.PickFolder(hwnd, "Choose where to install Tinnitdown", _path);
+        var picked = ShellHelpers.PickFolder(hwnd, "Choose where to install Shhtartup", _path);
         if (picked is null)
         {
             return;
         }
 
-        // Picking e.g. D:\Apps installs to D:\Apps\Tinnitdown, like most installers.
-        _path = Path.GetFileName(picked.TrimEnd('\\')).Equals("Tinnitdown", StringComparison.OrdinalIgnoreCase)
+        // Picking e.g. D:\Apps installs to D:\Apps\Shhtartup, like most installers.
+        _path = Path.GetFileName(picked.TrimEnd('\\')).Equals("Shhtartup", StringComparison.OrdinalIgnoreCase)
             ? picked
-            : Path.Combine(picked, "Tinnitdown");
+            : Path.Combine(picked, "Shhtartup");
         _error = null;
         User32.InvalidateRect(hwnd, 0, false);
     }
@@ -433,7 +433,7 @@ internal static class SetupWindow
                 hover: _hover == Part.Browse, pressed: _pressed == Part.Browse, enabled: true);
 
             DrawCheckRow(p, f, 0, "Create desktop shortcut", _desktopShortcut, Part.DesktopShortcut);
-            DrawCheckRow(p, f, 1, "Start Tinnitdown on startup", _startWithWindows, Part.StartWithWindows);
+            DrawCheckRow(p, f, 1, "Start Shhtartup on startup", _startWithWindows, Part.StartWithWindows);
             var startupRow = CheckRowRect(f, 1);
             p.Text("You can adjust this any time in the Settings menu", f.Caption, t.TextSecondary,
                 new UiRect(startupRow.X + f.Px(CheckLabelXDip), startupRow.Bottom + f.Px(2), w - startupRow.X - f.Px(CheckLabelXDip) - pad,
@@ -470,7 +470,7 @@ internal static class SetupWindow
             row with { X = row.X + f.Px(CheckLabelXDip), W = row.W - f.Px(CheckLabelXDip) }, Fluent.TextLeft);
     }
 
-    // Shortens a long path from the middle so the end stays visible: C:\…\Programs\Tinnitdown.
+    // Shortens a long path from the middle so the end stays visible: C:\…\Programs\Shhtartup.
     // (DrawText's DT_PATH_ELLIPSIS doesn't shorten these paths, so it's done by measuring.)
     private static string FitPath(Painter p, nint font, string path, int maxWidth)
     {
