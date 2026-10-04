@@ -265,14 +265,14 @@ function Invoke-Release {
     if ($LASTEXITCODE -ne 0) {
         Fail ("The push failed. The release is committed and tagged locally; once it's fixed, run:`n" +
             "      git push --atomic origin $branch refs/tags/$version`n" +
-            "      gh release create $version `"$exe`" --repo $Repo --title `"Shhtartup $version`" --notes-file $NotesFile --verify-tag")
+            "      gh release create $version `"$exe`" --repo $Repo --title $version --notes-file $NotesFile --verify-tag")
     }
 
     Step 'Creating the GitHub release'
-    & gh release create $version $exe --repo $Repo --title "Shhtartup $version" --notes-file $NotesFile --verify-tag --latest
+    & gh release create $version $exe --repo $Repo --title $version --notes-file $NotesFile --verify-tag --latest
     if ($LASTEXITCODE -ne 0) {
         Fail ("Creating the release failed. The tag is already on GitHub; once it's fixed, run:`n" +
-            "      gh release create $version `"$exe`" --repo $Repo --title `"Shhtartup $version`" --notes-file $NotesFile --verify-tag")
+            "      gh release create $version `"$exe`" --repo $Repo --title $version --notes-file $NotesFile --verify-tag")
     }
 
     Step 'Checking the README download button'

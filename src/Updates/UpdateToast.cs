@@ -327,9 +327,9 @@ internal static class UpdateToast
             p.Text($"New version available: {_release?.Version}", f.BodyStrong, t.TextPrimary, title, Fluent.TextLeft);
             p.Text($"Current version: {UpdateChecker.CurrentVersion}", f.Caption, t.TextSecondary, subtitle, Fluent.TextLeft);
 
-            Fluent.AccentButton(p, f, ButtonRect(f, w, 0), "Install and restart",
+            Fluent.AccentButton(p, f, ButtonRect(f, w, 0), "Install and restart app",
                 hover: _hover == Part.InstallNow, pressed: _pressed == Part.InstallNow);
-            Fluent.Button(p, f, ButtonRect(f, w, 1), "Install and restart later",
+            Fluent.Button(p, f, ButtonRect(f, w, 1), "Install and restart app later",
                 hover: _hover == Part.InstallLater, pressed: _pressed == Part.InstallLater, enabled: true);
             Fluent.Button(p, f, ButtonRect(f, w, 2), "Remind me later",
                 hover: _hover == Part.RemindLater, pressed: _pressed == Part.RemindLater, enabled: true);
@@ -341,7 +341,7 @@ internal static class UpdateToast
                 UpdateInstaller.Stage.Downloading => ($"Downloading {_installingVersion}…", $"{_percent}%"),
                 UpdateInstaller.Stage.Verifying => ("Verifying download…", "Checking it matches the release"),
                 UpdateInstaller.Stage.Installing => ($"Installing {_installingVersion}…", "Replacing files"),
-                _ => ("Restarting…", "Opening"),
+                _ => ("Restarting app…", "Opening"),
             };
             var steps = _willRestart ? 4 : 3;
             var step = (int)_stage;
