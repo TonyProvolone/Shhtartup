@@ -1,23 +1,25 @@
 # Publishes a Shhtartup release:
 #   1. asks for the version number (plain numbers, e.g. 0.1.0 -- never a leading "v")
-#   2. writes it into Shhtartup.csproj and app.manifest
+#   2. writes it into src\Shhtartup.csproj and src\app.manifest
 #   3. builds the Native AOT exe
 #   4. opens RELEASE_NOTES.md in VS Code and waits for you to save and close it
 #   5. commits everything, tags the version, pushes, and creates the GitHub release with the exe
 #   6. checks the README's "Download Latest Version" link now serves the new exe
 #   7. opens the release in your browser
 #
-# Run it with release.cmd (or: powershell -ExecutionPolicy Bypass -File release.ps1).
+# Run it with release.cmd in the repo root (or: powershell -ExecutionPolicy Bypass -File scripts\release.ps1).
 # Needs git, the .NET SDK, VS Code's "code" command and the GitHub CLI ("gh", signed in).
 # Anything before the commit can be cancelled with Ctrl+C; the version files are put back.
 
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
-Set-Location $PSScriptRoot
+# Everything below is relative to the repo root (this script lives in scripts\).
+$Root = Split-Path -Parent $PSScriptRoot
+Set-Location $Root
 
 $Repo = 'TonyProvolone/Shhtartup'
-$Project = 'Shhtartup.csproj'
-$Manifest = 'app.manifest'
+$Project = 'src\Shhtartup.csproj'
+$Manifest = 'src\app.manifest'
 $NotesFile = 'RELEASE_NOTES.md'
 $ExeName = 'Shhtartup.exe'
 $FirstVersion = '0.1.0'
@@ -69,12 +71,12 @@ function Test-Native([scriptblock]$command) {
     finally { $ErrorActionPreference = $previous }
 }
 
-function Read-Text([string]$path) { [IO.File]::ReadAllText((Join-Path $PSScriptRoot $path)) }
+function Read-Text([string]$path) { [IO.File]::ReadAllText((Join-Path $Root $path)) }
 
 # UTF-8 without BOM, LF line endings (matches .gitattributes).
 function Write-Text([string]$path, [string]$text) {
     $text = $text -replace "`r`n", "`n"
-    [IO.File]::WriteAllText((Join-Path $PSScriptRoot $path), $text, (New-Object Text.UTF8Encoding $false))
+    [IO.File]::WriteAllText((Join-Path $Root $path), $text, (New-Object Text.UTF8Encoding $false))
 }
 
 function Set-VersionedFile([string]$path, [string]$pattern, [string]$replacement) {
@@ -167,7 +169,7 @@ function Read-ReleaseVersion {
 }
 
 function Edit-ReleaseNotes([string]$version) {
-    $path = Join-Path $PSScriptRoot $NotesFile
+    $path = Join-Path $Root $NotesFile
 
     # Notes left over from a cancelled run (changed since the last commit) are reused, not overwritten.
     $isDraft = (Test-Path $path) -and ($null -ne (git status --porcelain -- $NotesFile))
@@ -213,7 +215,7 @@ function Invoke-Release {
     }
     Write-Host "    Releasing from branch '$branch'."
 
-    $readme = Join-Path $PSScriptRoot 'README.md'
+    $readme = Join-Path $Root 'README.md'
     if ((Test-Path $readme) -and -not (Select-String -Path $readme -SimpleMatch $LatestDownloadUrl -Quiet)) {
         Warn "README.md's download button doesn't link to $LatestDownloadUrl."
     }
@@ -227,7 +229,7 @@ function Invoke-Release {
     Write-Host "    Updated $Project and $Manifest."
 
     Step 'Building'
-    $outDir = Join-Path $PSScriptRoot "artifacts\release\$version"
+    $outDir = Join-Path $Root "artifacts\release\$version"
     if (Test-Path $outDir) { Remove-Item $outDir -Recurse -Force }
     Invoke-Checked 'The build' { dotnet publish $Project -c Release -o $outDir --nologo }
 
