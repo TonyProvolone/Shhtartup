@@ -171,6 +171,18 @@ internal static class TextMetrics
         Gdi32.DeleteDC(dc);
         return r.Right - r.Left;
     }
+
+    // Size of text word-wrapped to at most maxWidth pixels.
+    public static (int W, int H) Wrapped(string text, nint font, int maxWidth)
+    {
+        var dc = Gdi32.CreateCompatibleDC(0);
+        var oldFont = Gdi32.SelectObject(dc, font);
+        var r = new RECT { Right = maxWidth };
+        User32.DrawTextW(dc, text, text.Length, ref r, User32.DT_CALCRECT | User32.DT_WORDBREAK | User32.DT_NOPREFIX);
+        Gdi32.SelectObject(dc, oldFont);
+        Gdi32.DeleteDC(dc);
+        return (r.Right - r.Left, r.Bottom - r.Top);
+    }
 }
 
 // Windows 11 (WinUI) control visuals, drawn by hand.

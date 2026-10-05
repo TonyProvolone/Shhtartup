@@ -7,5 +7,5 @@ internal static class TimerIds
     public const nuint UpdateCheckTimer = 3;
     public const nuint UpdateToastRetryTimer = 4;
     public const nuint VolumeToastTimer = 5;
-    public const nuint PathTipTimer = 6;
+    public const nuint TipTimer = 6;
 }

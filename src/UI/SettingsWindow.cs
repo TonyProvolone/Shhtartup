@@ -4,9 +4,9 @@ using Shhtartup.Interop;
 
 namespace Shhtartup;
 
-// Windows 11 Settings-style window: three cards with a custom-drawn Fluent slider, number box,
-// toggle switch and button. The only native control is the edit box inside the number box, so
-// typing, selection and clipboard work as usual.
+// Windows 11 Settings-style window: cards with a custom-drawn Fluent slider, number box, toggle
+// switches, a games list with check boxes, and a button. The only native control is the edit box
+// inside the number box, so typing, selection and clipboard work as usual.
 internal static class SettingsWindow
 {
     private const string ClassName = "ShhtartupSettingsWindowClass";
@@ -21,11 +21,13 @@ internal static class SettingsWindow
     private const int ContentXDip = 32;
     private const int ContentRightDip = 428;
 
+    // Cards top to bottom, CardGapDip apart. The "Adjust volume every launch" card holds the games list
+    // while the setting is off, so everything below it moves down then.
     private const int VolumeCardYDip = 16;
     private const int VolumeCardHDip = 114;
     private const int EveryLaunchCardYDip = 138;
-    private const int StartupCardYDip = 214;
-    private const int MemoryCardYDip = 290;
+    private const int CardGapDip = 8;
+    private const int ToggleCardHDip = 52;
     private const int SmallCardHDip = 68;
 
     private const int SliderXDip = 32;
@@ -48,21 +50,26 @@ internal static class SettingsWindow
 
     private const int ToggleXDip = 388;
     private const int ToggleLabelWDip = 60;
-    private const int ButtonXDip = 284;
+    private const int ButtonXDip = 332;
     private const int ButtonWDip = 96;
-    private const int ChevronXDip = 396;
-    private const int ChevronSizeDip = 32;
 
-    // The games list inside the expanded "Remembered games & apps" card.
+    // The games list inside the "Adjust volume every launch" card.
     private const int ListHeaderHDip = 32;
     private const int RowHDip = 36;
     private const int ListBottomPadDip = 8;
     private const int MaxVisibleRows = 10; // then it scrolls, so the window never gets too tall
-    private const uint PathTipDelayMs = 1000; // hovering a row this long shows its full path
     private const int CheckXDip = 408;
     private const int CheckSizeDip = 20;
 
-    private enum Part { None, Slider, Box, SpinUp, SpinDown, EveryLaunchToggle, Toggle, Forget, Expander, Row }
+    // Hovering something with a tooltip this long shows it.
+    private const uint TipDelayMs = 1000;
+    private const string EveryLaunchTip =
+        "Global setting. Checks and adjusts the volume of each game/app every time it launches. " +
+        "If turned off, you can set each individual game/app below.";
+    private const string StartupTip = "Runs Shhtartup automatically when Windows starts.";
+
+    // EveryLaunchCard/StartupCard: the rest of those cards, which show the same tooltip as their toggle.
+    private enum Part { None, Slider, Box, SpinUp, SpinDown, EveryLaunchToggle, EveryLaunchCard, Toggle, StartupCard, Forget, Row }
 
     // What's under the mouse. Row is the index into _games, for Part.Row only.
     private readonly record struct Hit(Part Part, int Row = -1);
@@ -81,7 +88,6 @@ internal static class SettingsWindow
     private static bool _syncing;
     private static bool _autoStart;
 
-    private static bool _expanded;
     private static List<KnownGame> _games = [];
     private static int _firstRow;    // scroll position, in rows
     private static int _visibleRows; // rows the open list has room for
@@ -128,10 +134,18 @@ internal static class SettingsWindow
         Invalidate();
     }
 
-    private static int MemoryCardHDip =>
-        _expanded ? SmallCardHDip + ListHeaderHDip + _visibleRows * RowHDip + ListBottomPadDip : SmallCardHDip;
+    // The games list shows only while "Adjust volume every launch" is off (each game can then be set apart).
+    private static bool ListOpen => !Settings.Current.AdjustEveryLaunch;
 
-    private static int ClientHDip => MemoryCardYDip + MemoryCardHDip + BottomMarginDip;
+    // Column labels plus the visible rows, or a one-line note while there are no games yet.
+    private static int ListBodyHDip => _games.Count == 0 ? RowHDip : ListHeaderHDip + _visibleRows * RowHDip;
+
+    private static int EveryLaunchCardHDip =>
+        ListOpen ? ToggleCardHDip + ListBodyHDip + ListBottomPadDip : ToggleCardHDip;
+
+    private static int StartupCardYDip => EveryLaunchCardYDip + EveryLaunchCardHDip + CardGapDip;
+    private static int MemoryCardYDip => StartupCardYDip + ToggleCardHDip + CardGapDip;
+    private static int ClientHDip => MemoryCardYDip + SmallCardHDip + BottomMarginDip;
 
     private const uint WindowStyle = User32.WS_OVERLAPPED | User32.WS_CAPTION | User32.WS_SYSMENU | User32.WS_MINIMIZEBOX | User32.WS_CLIPCHILDREN;
 
@@ -149,15 +163,13 @@ internal static class SettingsWindow
     {
         var f = _fonts!;
         _games = KnownGames.Sorted();
-        if (_games.Count == 0)
-        {
-            _expanded = false;
-        }
 
         var (monitor, _) = User32.MonitorOfWindow(Hwnd);
         var work = monitor.rcWork;
-        var (_, collapsedH) = WindowSize(f, MemoryCardYDip + SmallCardHDip + BottomMarginDip);
-        var spareDip = (work.Bottom - work.Top - collapsedH) * 96 / (int)f.Dpi - ListHeaderHDip - ListBottomPadDip;
+        // The window without the list, then however many rows fit in what's left of the screen.
+        var withoutListDip = EveryLaunchCardYDip + 2 * ToggleCardHDip + SmallCardHDip + 2 * CardGapDip + BottomMarginDip;
+        var (_, withoutListH) = WindowSize(f, withoutListDip);
+        var spareDip = (work.Bottom - work.Top - withoutListH) * 96 / (int)f.Dpi - ListHeaderHDip - ListBottomPadDip;
         var fits = Math.Max(1, spareDip / RowHDip);
         _visibleRows = Math.Min(_games.Count, Math.Min(MaxVisibleRows, fits));
         _firstRow = Math.Clamp(_firstRow, 0, Math.Max(0, _games.Count - _visibleRows));
@@ -245,7 +257,7 @@ internal static class SettingsWindow
 
     private static void Hide()
     {
-        HidePathTip();
+        HideTip();
         User32.ShowWindow(Hwnd, User32.SW_HIDE);
     }
 
@@ -319,9 +331,9 @@ internal static class SettingsWindow
                 return 0;
 
             case User32.WM_TIMER:
-                if (wParam == TimerIds.PathTipTimer)
+                if (wParam == TimerIds.TipTimer)
                 {
-                    ShowPathTip();
+                    ShowTip();
                 }
                 return 0;
 
@@ -349,9 +361,12 @@ internal static class SettingsWindow
         return new UiRect(box.X + f.Px(offsetDip), box.Y + (box.H - h) / 2, f.Px(SpinWDip), h);
     }
 
+    // The header of a toggle card (the "Adjust volume every launch" card is taller while its list shows).
+    private static UiRect ToggleCardHeader(UiFonts f, int cardYDip) => CardRect(f, cardYDip, ToggleCardHDip);
+
     private static UiRect ToggleRect(UiFonts f, int cardYDip)
     {
-        var card = CardRect(f, cardYDip, SmallCardHDip);
+        var card = ToggleCardHeader(f, cardYDip);
         var toggle = Fluent.ToggleRect(f, f.Px(ToggleXDip), 0);
         return toggle with { Y = card.Y + (card.H - toggle.H) / 2 };
     }
@@ -371,19 +386,9 @@ internal static class SettingsWindow
         return new UiRect(f.Px(ButtonXDip), card.Y + (card.H - h) / 2, f.Px(ButtonWDip), h);
     }
 
-    // The memory card's header row; clicking it (outside "Forget all") opens or closes the list.
-    private static UiRect ExpanderRect(UiFonts f) => CardRect(f, MemoryCardYDip, SmallCardHDip);
-
-    private static UiRect ChevronRect(UiFonts f)
-    {
-        var header = ExpanderRect(f);
-        var size = f.Px(ChevronSizeDip);
-        return new UiRect(f.Px(ChevronXDip), header.Y + (header.H - size) / 2, size, size);
-    }
-
-    // The visible (scrolled) rows.
+    // The visible (scrolled) rows, below the toggle and column labels.
     private static UiRect ListRect(UiFonts f) =>
-        f.Rect(CardXDip, MemoryCardYDip + SmallCardHDip + ListHeaderHDip, CardWDip, _visibleRows * RowHDip);
+        f.Rect(CardXDip, EveryLaunchCardYDip + ToggleCardHDip + ListHeaderHDip, CardWDip, _visibleRows * RowHDip);
 
     // visibleIndex counts from the top of the visible rows.
     private static UiRect RowRect(UiFonts f, int visibleIndex)
@@ -409,12 +414,10 @@ internal static class SettingsWindow
         if (BoxRect(f).Contains(x, y)) return new(Part.Box);
         if (ToggleHitRect(f, EveryLaunchCardYDip).Contains(x, y)) return new(Part.EveryLaunchToggle);
         if (ToggleHitRect(f, StartupCardYDip).Contains(x, y)) return new(Part.Toggle);
-        if (_games.Count > 0)
-        {
-            if (ButtonRect(f).Contains(x, y)) return new(Part.Forget);
-            if (ExpanderRect(f).Contains(x, y)) return new(Part.Expander);
-        }
-        if (_expanded && ListRect(f).Contains(x, y))
+        if (ToggleCardHeader(f, EveryLaunchCardYDip).Contains(x, y)) return new(Part.EveryLaunchCard);
+        if (ToggleCardHeader(f, StartupCardYDip).Contains(x, y)) return new(Part.StartupCard);
+        if (_games.Count > 0 && ButtonRect(f).Contains(x, y)) return new(Part.Forget);
+        if (ListOpen && _games.Count > 0 && ListRect(f).Contains(x, y))
         {
             var row = _firstRow + (y - ListRect(f).Y) / f.Px(RowHDip);
             if (row < _games.Count) return new(Part.Row, row);
@@ -422,36 +425,49 @@ internal static class SettingsWindow
         return default;
     }
 
+    // What hovering this shows after TipDelayMs, if anything.
+    private static (string Text, bool Wrap)? TipFor(Hit hit) => hit.Part switch
+    {
+        Part.Row when hit.Row < _games.Count => (_games[hit.Row].Path, false),
+        Part.EveryLaunchToggle or Part.EveryLaunchCard => (EveryLaunchTip, true),
+        Part.Toggle or Part.StartupCard => (StartupTip, true),
+        _ => null,
+    };
+
     // --- Input.
 
     private static void SetHover(Hit part)
     {
         if (_hover != part)
         {
+            // Moving within something with the same tooltip (a card and its toggle) keeps it.
+            var sameTip = TipFor(_hover) == TipFor(part);
             _hover = part;
             User32.InvalidateRect(Hwnd, 0, false);
 
-            // Resting on a games-list row for a moment shows its full path.
-            HidePathTip();
-            if (part.Part == Part.Row)
+            if (!sameTip)
             {
-                User32.SetTimer(Hwnd, TimerIds.PathTipTimer, PathTipDelayMs, 0);
+                HideTip();
+                if (TipFor(part) is not null)
+                {
+                    User32.SetTimer(Hwnd, TimerIds.TipTimer, TipDelayMs, 0);
+                }
             }
         }
     }
 
-    private static void ShowPathTip()
+    private static void ShowTip()
     {
-        User32.KillTimer(Hwnd, TimerIds.PathTipTimer);
-        if (_hover.Part == Part.Row && _hover.Row < _games.Count && !_dragging)
+        User32.KillTimer(Hwnd, TimerIds.TipTimer);
+        if (TipFor(_hover) is { } tip && !_dragging)
         {
-            HoverTip.Show(_games[_hover.Row].Path, _fonts!);
+            HoverTip.Show(tip.Text, _fonts!, tip.Wrap);
         }
     }
 
-    private static void HidePathTip()
+    private static void HideTip()
     {
-        User32.KillTimer(Hwnd, TimerIds.PathTipTimer);
+        User32.KillTimer(Hwnd, TimerIds.TipTimer);
         HoverTip.Hide();
     }
 
@@ -480,7 +496,7 @@ internal static class SettingsWindow
 
     private static void OnMouseDown(int x, int y)
     {
-        HidePathTip();
+        HideTip();
         _pressed = HitTest(x, y);
 
         if (_pressed.Part == Part.Box)
@@ -539,17 +555,17 @@ internal static class SettingsWindow
                 break;
 
             case Part.EveryLaunchToggle:
+                // Turning it off opens the games list; turning it on closes it.
                 KnownGames.SetAdjustEveryLaunchForAll(!Settings.Current.AdjustEveryLaunch);
+                UpdateLayout();
+                SetHover(HitTest(x, y));
                 break;
 
             case Part.Row:
                 // _games holds the same objects KnownGames does, so the row redraws with the change.
+                // Checking the last unchecked game turns the global setting on, which closes the list.
                 var game = _games[released.Row];
                 KnownGames.SetAdjustEveryLaunch(game.Path, game.AdjustEveryLaunch != true);
-                break;
-
-            case Part.Expander:
-                _expanded = !_expanded;
                 UpdateLayout();
                 SetHover(HitTest(x, y));
                 break;
@@ -632,7 +648,7 @@ internal static class SettingsWindow
         var pt = new POINT { X = MouseX(screenPos), Y = MouseY(screenPos) };
         User32.ScreenToClient(Hwnd, ref pt);
 
-        if (!_expanded || !ListRect(_fonts!).Contains(pt.X, pt.Y))
+        if (!ListOpen || _games.Count == 0 || !ListRect(_fonts!).Contains(pt.X, pt.Y))
         {
             SetVolume(Settings.Current.DefaultVolumePercent + (delta > 0 ? 1 : -1), fromEdit: false, save: true);
             return;
@@ -645,7 +661,7 @@ internal static class SettingsWindow
         if (rows != 0)
         {
             _firstRow = Math.Clamp(_firstRow - rows, 0, Math.Max(0, _games.Count - _visibleRows));
-            HidePathTip();
+            HideTip();
             SetHover(HitTest(pt.X, pt.Y));
             User32.InvalidateRect(Hwnd, 0, false);
         }
@@ -759,50 +775,40 @@ internal static class SettingsWindow
             DrawSpin(p, f, SpinUpXDip, Fluent.GlyphChevronUp, Part.SpinUp);
             DrawSpin(p, f, SpinDownXDip, Fluent.GlyphChevronDown, Part.SpinDown);
 
-            ToggleCard(p, f, EveryLaunchCardYDip, "Adjust on every launch",
-                "For all games; or set each one in the list below",
-                Settings.Current.AdjustEveryLaunch, Part.EveryLaunchToggle);
-            ToggleCard(p, f, StartupCardYDip, "Run on startup",
-                "Start Shhtartup automatically on startup", _autoStart, Part.Toggle);
-
+            PaintEveryLaunchCard(p, f);
+            ToggleCard(p, f, StartupCardYDip, ToggleCardHDip, "Run on startup", _autoStart, Part.Toggle);
             PaintMemoryCard(p, f);
         }
     }
 
-    // "Remembered games & apps": an expander card (like Windows Settings) whose list has a
-    // per-game "Every launch" check box.
-    private static void PaintMemoryCard(Painter p, UiFonts f)
+    // "Adjust volume every launch", and while it's off, every remembered game with its own check box.
+    private static void PaintEveryLaunchCard(Painter p, UiFonts f)
     {
         var t = Theme.P;
-        var count = _games.Count;
-        var card = CardRect(f, MemoryCardYDip, MemoryCardHDip);
-        Fluent.Card(p, f, card);
-
-        CardText(p, f, MemoryCardYDip + 15, ButtonXDip - 12, "Remembered games & apps",
-            count == 0 ? "None yet." : $"{count} logged and adjusted");
-        Fluent.Button(p, f, ButtonRect(f), "Forget all",
-            hover: _hover.Part == Part.Forget, pressed: _pressed.Part == Part.Forget, enabled: count > 0);
-
-        if (count > 0)
-        {
-            var chevron = ChevronRect(f);
-            Fluent.SubtleFill(p, f, chevron, hover: _hover.Part == Part.Expander, pressed: _pressed.Part == Part.Expander);
-            Fluent.Glyph(p, f.IconSmall, _expanded ? Fluent.GlyphChevronUp : Fluent.GlyphChevronDown, t.TextSecondary, chevron);
-        }
-
-        if (!_expanded)
+        ToggleCard(p, f, EveryLaunchCardYDip, EveryLaunchCardHDip, "Adjust volume every launch",
+            Settings.Current.AdjustEveryLaunch, Part.EveryLaunchToggle);
+        if (!ListOpen)
         {
             return;
         }
 
+        var card = CardRect(f, EveryLaunchCardYDip, EveryLaunchCardHDip);
         var b = f.Hairline;
-        var headerBottom = card.Y + f.Px(SmallCardHDip);
+        var headerBottom = card.Y + f.Px(ToggleCardHDip);
         p.FillRect(card.X + b, headerBottom, card.W - 2 * b, b, t.Divider);
+
+        var contentX = f.Px(ContentXDip);
+        var count = _games.Count;
+        if (count == 0)
+        {
+            p.Text("Games and apps show up here after Shhtartup first adjusts them.", f.Caption, t.TextSecondary,
+                new UiRect(contentX, headerBottom, f.Px(ContentRightDip) - contentX, f.Px(RowHDip)), Fluent.TextLeft);
+            return;
+        }
 
         // Column labels.
         var labelY = headerBottom + f.Px(6);
         var labelH = f.Px(ListHeaderHDip - 6);
-        var contentX = f.Px(ContentXDip);
         p.Text("Game or app", f.Caption, t.TextSecondary, new UiRect(contentX, labelY, f.Px(200), labelH), Fluent.TextLeft);
         p.Text("Every launch", f.Caption, t.TextSecondary,
             new UiRect(f.Px(ContentRightDip) - f.Px(120), labelY, f.Px(120), labelH), Fluent.TextRight);
@@ -817,7 +823,7 @@ internal static class SettingsWindow
             var pressed = _pressed.Part == Part.Row && _pressed.Row == index;
             Fluent.SubtleFill(p, f, row, hover, pressed);
 
-            // Just the name; the full path shows on hover (ShowPathTip).
+            // Just the name; the full path shows on hover (TipFor).
             p.Text(game.Title, f.Body, t.TextPrimary,
                 new UiRect(contentX, row.Y, nameRight - contentX, row.H), Fluent.TextLeft);
 
@@ -836,11 +842,26 @@ internal static class SettingsWindow
         }
     }
 
-    private static void ToggleCard(Painter p, UiFonts f, int cardYDip, string title, string description, bool on, Part part)
+    private static void PaintMemoryCard(Painter p, UiFonts f)
+    {
+        var count = _games.Count;
+        Fluent.Card(p, f, CardRect(f, MemoryCardYDip, SmallCardHDip));
+        CardText(p, f, MemoryCardYDip + 15, ButtonXDip - 12, "Remembered games & apps",
+            count == 0 ? "None yet." : $"{count} logged and adjusted");
+        Fluent.Button(p, f, ButtonRect(f), "Forget all",
+            hover: _hover.Part == Part.Forget, pressed: _pressed.Part == Part.Forget, enabled: count > 0);
+    }
+
+    // A card with a title and an On/Off toggle in its header (cardHDip includes anything below that).
+    private static void ToggleCard(Painter p, UiFonts f, int cardYDip, int cardHDip, string title, bool on, Part part)
     {
         var t = Theme.P;
-        Fluent.Card(p, f, CardRect(f, cardYDip, SmallCardHDip));
-        CardText(p, f, cardYDip + 15, ToggleXDip - ToggleLabelWDip, title, description);
+        Fluent.Card(p, f, CardRect(f, cardYDip, cardHDip));
+        var header = ToggleCardHeader(f, cardYDip);
+        var x = f.Px(ContentXDip);
+        p.Text(title, f.Body, t.TextPrimary,
+            new UiRect(x, header.Y, f.Px(ToggleXDip - ToggleLabelWDip) - x, header.H), Fluent.TextLeft);
+
         var toggle = ToggleRect(f, cardYDip);
         p.Text(on ? "On" : "Off", f.Body, t.TextPrimary,
             new UiRect(toggle.X - f.Px(ToggleLabelWDip), toggle.Y, f.Px(ToggleLabelWDip - 12), toggle.H), Fluent.TextRight);

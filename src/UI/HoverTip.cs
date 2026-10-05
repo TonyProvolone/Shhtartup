@@ -11,24 +11,40 @@ internal static class HoverTip
     private const string ClassName = "ShhtartupHoverTipClass";
 
     private const int PadXDip = 8;
+    private const int PadYDip = 6;
     private const int HeightDip = 28;
-    private const int MaxWidthDip = 560;
+    private const int MaxWidthDip = 560;     // one line (a path is shortened in the middle to fit)
+    private const int WrapWidthDip = 320;    // wrapped text
     private const int CursorOffsetDip = 20;
 
     private static nint _hwnd;
     private static UiFonts? _fonts;
     private static string _text = string.Empty;
+    private static bool _wrap;
 
-    // Shows the tip just below and right of the cursor, kept on the cursor's monitor.
-    public static void Show(string text, UiFonts fonts)
+    // Shows the tip just below and right of the cursor, kept on the cursor's monitor. wrap: text
+    // that's a sentence or two (word-wrapped); otherwise one line, like a file path.
+    public static void Show(string text, UiFonts fonts, bool wrap = false)
     {
         EnsureCreated();
         _text = text;
         _fonts = fonts;
+        _wrap = wrap;
 
         var f = fonts;
-        var w = Math.Min(TextMetrics.Width(text, f.Caption) + 2 * f.Px(PadXDip), f.Px(MaxWidthDip));
-        var h = f.Px(HeightDip);
+        var padX = f.Px(PadXDip);
+        int w, h;
+        if (wrap)
+        {
+            var (textW, textH) = TextMetrics.Wrapped(text, f.Caption, f.Px(WrapWidthDip));
+            w = textW + 2 * padX;
+            h = textH + 2 * f.Px(PadYDip);
+        }
+        else
+        {
+            w = Math.Min(TextMetrics.Width(text, f.Caption) + 2 * padX, f.Px(MaxWidthDip));
+            h = f.Px(HeightDip);
+        }
 
         User32.GetCursorPos(out var cursor);
         var (monitor, _) = User32.MonitorAtCursor();
@@ -111,9 +127,18 @@ internal static class HoverTip
         {
             p.FillRect(0, 0, rc.Right, rc.Bottom, t.FlyoutBorder);
             p.FillRect(b, b, rc.Right - 2 * b, rc.Bottom - 2 * b, t.FlyoutBg);
-            var pad = f.Px(PadXDip);
-            p.Text(_text, f.Caption, t.TextPrimary, new UiRect(pad, 0, rc.Right - 2 * pad, rc.Bottom),
-                User32.DT_LEFT | User32.DT_VCENTER | User32.DT_SINGLELINE | User32.DT_PATH_ELLIPSIS);
+            var padX = f.Px(PadXDip);
+            if (_wrap)
+            {
+                var padY = f.Px(PadYDip);
+                p.Text(_text, f.Caption, t.TextPrimary, new UiRect(padX, padY, rc.Right - 2 * padX, rc.Bottom - 2 * padY),
+                    User32.DT_LEFT | User32.DT_WORDBREAK);
+            }
+            else
+            {
+                p.Text(_text, f.Caption, t.TextPrimary, new UiRect(padX, 0, rc.Right - 2 * padX, rc.Bottom),
+                    User32.DT_LEFT | User32.DT_VCENTER | User32.DT_SINGLELINE | User32.DT_PATH_ELLIPSIS);
+            }
         }
 
         User32.EndPaint(_hwnd, in ps);
