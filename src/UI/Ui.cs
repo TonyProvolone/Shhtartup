@@ -158,6 +158,21 @@ internal sealed class Painter : IDisposable
     }
 }
 
+internal static class TextMetrics
+{
+    // Single-line width in pixels, for sizing a window to its text before it paints.
+    public static int Width(string text, nint font)
+    {
+        var dc = Gdi32.CreateCompatibleDC(0);
+        var oldFont = Gdi32.SelectObject(dc, font);
+        var r = new RECT();
+        User32.DrawTextW(dc, text, text.Length, ref r, User32.DT_CALCRECT | User32.DT_SINGLELINE | User32.DT_NOPREFIX);
+        Gdi32.SelectObject(dc, oldFont);
+        Gdi32.DeleteDC(dc);
+        return r.Right - r.Left;
+    }
+}
+
 // Windows 11 (WinUI) control visuals, drawn by hand.
 internal static class Fluent
 {

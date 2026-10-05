@@ -33,6 +33,9 @@ internal static class LauncherCatalog
         // Epic
         "epicwebhelper.exe", "epiconlineservices.exe", "epiconlineserviceshost.exe",
         "epiconlineservicesuserhelper.exe", "unrealcefsubprocess.exe", "crashreportclient.exe",
+        // Epic Online Services overlay: started by games that use Epic's online services (e.g. Rocket
+        // League), even when they're launched from Steam.
+        "eosoverlayrenderer-win64-shipping.exe", "eosoverlayrenderer-win32-shipping.exe",
         // GOG
         "galaxyclient helper.exe", "galaxycommunication.exe", "gog galaxy notifications renderer.exe",
         "galaxyupdater.exe",

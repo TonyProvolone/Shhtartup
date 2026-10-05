@@ -116,7 +116,7 @@ internal static class VolumeToast
             _iconStyle = iconStyle;
         }
 
-        var w = Math.Min(f.Px(PadDip + IconDip + GapDip + PadDip) + MeasureText(_text, f.Body), f.Px(MaxWidthDip));
+        var w = Math.Min(f.Px(PadDip + IconDip + GapDip + PadDip) + TextMetrics.Width(_text, f.Body), f.Px(MaxWidthDip));
         var h = f.Px(HeightDip);
         var margin = f.Px(MarginDip);
         var work = monitor.rcWork;
@@ -126,17 +126,6 @@ internal static class VolumeToast
         User32.SetWindowPos(_hwnd, User32.HWND_TOPMOST, work.Right - w - margin, work.Bottom - h - margin, w, h,
             User32.SWP_SHOWWINDOW | User32.SWP_NOACTIVATE);
         User32.InvalidateRect(_hwnd, 0, false);
-    }
-
-    private static int MeasureText(string text, nint font)
-    {
-        var dc = Gdi32.CreateCompatibleDC(0);
-        var oldFont = Gdi32.SelectObject(dc, font);
-        var r = new RECT();
-        User32.DrawTextW(dc, text, text.Length, ref r, User32.DT_CALCRECT | User32.DT_SINGLELINE | User32.DT_NOPREFIX);
-        Gdi32.SelectObject(dc, oldFont);
-        Gdi32.DeleteDC(dc);
-        return r.Right - r.Left;
     }
 
     private static bool MustStayHidden() =>

@@ -394,6 +394,16 @@ internal static partial class User32
     [LibraryImport("user32.dll")]
     public static partial uint GetWindowThreadProcessId(nint hWnd, out uint lpdwProcessId);
 
+    public const uint DT_PATH_ELLIPSIS = 0x4000;
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool GetWindowRect(nint hWnd, out RECT lpRect);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool ScreenToClient(nint hWnd, ref POINT lpPoint);
+
     public const uint DT_WORDBREAK = 0x0010;
     public const uint DT_CALCRECT = 0x0400;
     public const int VK_RETURN = 0x0D;
@@ -417,8 +427,11 @@ internal static partial class User32
     public static (MONITORINFO Info, uint Dpi) MonitorOfForegroundWindow()
     {
         var hwnd = GetForegroundWindow();
-        return hwnd == 0 ? PrimaryMonitor() : MonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY));
+        return hwnd == 0 ? PrimaryMonitor() : MonitorOfWindow(hwnd);
     }
+
+    public static (MONITORINFO Info, uint Dpi) MonitorOfWindow(nint hwnd) =>
+        MonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST));
 
     // The primary monitor always contains (0, 0).
     public static (MONITORINFO Info, uint Dpi) PrimaryMonitor() =>

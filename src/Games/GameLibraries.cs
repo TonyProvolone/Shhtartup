@@ -254,7 +254,7 @@ internal static class GameLibraries
         roots.Add((root, source));
     }
 
-    private static bool IsTooBroad(string root)
+    public static bool IsTooBroad(string root)
     {
         if (root.Length <= 3)
         {
