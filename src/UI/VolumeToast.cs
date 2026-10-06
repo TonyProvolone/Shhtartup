@@ -3,7 +3,7 @@ using Shhtartup.Interop;
 
 namespace Shhtartup;
 
-// Small, silent pill in the bottom-right corner when a game/app's volume has just been turned down
+// Small, silent pill in the top-right corner when a game/app's volume has just been turned down
 // (skipped over exclusive-fullscreen games and presentations).
 // It's purely informational and must never get in a game's way: it can't be clicked (mouse input
 // passes straight through to the window underneath), never takes focus, isn't in the taskbar or
@@ -91,7 +91,8 @@ internal static class VolumeToast
         User32.SetLayeredWindowAttributes(_hwnd, 0, 0, User32.LWA_ALPHA);
     }
 
-    // Sizes to the text and docks to the bottom-right of the monitor the game is on.
+    // Sizes to the text and docks to the top-right of the monitor the game is on (Windows' own
+    // notifications stack up in the bottom-right and would cover it there).
     private static void Place()
     {
         Theme.Refresh();
@@ -123,7 +124,7 @@ internal static class VolumeToast
 
         var radius = f.Px(RadiusDip);
         User32.SetWindowRgn(_hwnd, Gdi32.CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2), true);
-        User32.SetWindowPos(_hwnd, User32.HWND_TOPMOST, work.Right - w - margin, work.Bottom - h - margin, w, h,
+        User32.SetWindowPos(_hwnd, User32.HWND_TOPMOST, work.Right - w - margin, work.Top + margin, w, h,
             User32.SWP_SHOWWINDOW | User32.SWP_NOACTIVATE);
         User32.InvalidateRect(_hwnd, 0, false);
     }
