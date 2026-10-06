@@ -88,6 +88,7 @@ internal static partial class User32
     public const uint WM_HSCROLL = 0x0114;
     public const uint WM_RBUTTONUP = 0x0205;
     public const uint WM_LBUTTONUP = 0x0202;
+    public const uint WM_LBUTTONDBLCLK = 0x0203;
     public const uint WM_APP = 0x8000;
 
     public const nint HWND_MESSAGE = -3;

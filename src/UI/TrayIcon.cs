@@ -187,6 +187,10 @@ internal static class TrayIcon
             {
                 ShowContextMenu();
             }
+            else if (mouseMsg == User32.WM_LBUTTONDBLCLK)
+            {
+                SettingsWindow.Show();
+            }
             else if (mouseMsg == Shell32.NIN_BALLOONUSERCLICK)
             {
                 UpdateChecker.OnNotificationClicked();
