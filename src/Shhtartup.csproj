@@ -9,7 +9,7 @@
     <AssemblyName>Shhtartup</AssemblyName>
     <RootNamespace>Shhtartup</RootNamespace>
     <!-- Set by scripts\release.ps1. Compared against the GitHub release tag (e.g. 0.1.0) by the update check. -->
-    <Version>0.1.1</Version>
+    <Version>0.2.0</Version>
 
     <PublishAot>true</PublishAot>
     <SelfContained>true</SelfContained>
